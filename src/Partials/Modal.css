@@ -1,0 +1,65 @@
+.modal.display-block {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  
+  .modalOverlay {
+    background-color: #030406a8;
+  }
+  
+  section.modal-main {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 80%;
+    margin: 0 auto;
+    padding: 9px;
+    text-align: center;
+    box-sizing: border-box;
+    z-index: 9999;
+  }
+  
+  .instaHeading p {
+    display: flex;
+    width: 95%;
+    justify-content: center;
+  }
+  .modalInnerDiv button.ModalClosebtn {
+    position: absolute;
+    top: -23px;
+    right: -18px;
+    background: none;
+    border: none;
+  }
+  
+  .modalInnerDiv button img {
+    width: 15px;
+  }
+  
+  .modalInnerDiv p {
+    font-weight: 100;
+    line-height: 1.5;
+    margin: 0;
+    color: #002241;
+  }
+  
+  .modal.display-none section.modal-main {
+    display: none;
+  }
+  .modalSection {
+    background-color: #fff;
+    border-radius: 10px;
+}
+  @media (max-width: 640px) {
+    section.modal-main {
+      max-width: 80%;
+    }
+  }
