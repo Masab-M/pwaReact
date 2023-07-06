@@ -80,6 +80,16 @@ self.addEventListener("sync", (event) => {
     });
   }
 });
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sync-messages") {
+    event.waitUntil(sendOutboxMessages());
+  }
+});
+
+function sendOutboxMessages() {
+  // Implement your logic to send outbox messages here
+  alert('done')
+}
 // self.addEventListener('sync', event => {
 //   if (event.tag === 'feedRefresh') {
 //       event.waitUntil(()=>{
