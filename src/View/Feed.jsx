@@ -62,7 +62,6 @@ export default function Feed() {
             console.error(e)
         }
     }, [croppedAreaPixels, rotation])
-    console.log(editId);
     function getWindowDimensions() {
         const { innerWidth: width, innerHeight: height } = window;
         return {
@@ -87,8 +86,28 @@ export default function Feed() {
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
+            // navigator.serviceWorker.ready.then((reg)=>{
+            //     console.log(reg);
+            //     reg.sync.register('feedRefresh').then(()=>{
+            //         console.log("sync register");
+            //     })
+            // }).catch(()=>{
+            //     console.log('it broke');
+            // })
+        }).catch(async(err) => {
+           
+            getFeedCache()
         })
     }, [refresh])
+    async function getFeedCache() {
+        const cacheResponse = await caches.match('firebase-data');
+        if (cacheResponse) {
+            const cachedData = await cacheResponse.json();
+            setPosts(cachedData)
+        } else {
+            console.log('No cached data available');
+        }
+    }
     useEffect(() => {
         if (cameraAccess) {
             videoRef.current.srcObject.getVideoTracks().forEach(track => {
@@ -105,12 +124,11 @@ export default function Feed() {
     }
     function findLocation() {
         navigator.geolocation.getCurrentPosition(position => {
-            console.log(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyACIbySi3LQJrBV9l55JAgM5k6Qy_2SW94`);
             fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyACIbySi3LQJrBV9l55JAgM5k6Qy_2SW94`
             )
                 .then((response) => response.json())
-                .then((data) => {
+                .then(async (data) => {
                     if (data.status === 'OK') {
                         const addressComponents = data.results[0].address_components;
                         let state = '';
@@ -126,21 +144,50 @@ export default function Feed() {
                         }
 
                         setLocation(`${state}, ${country}`);
-                        console.log(`${state}, ${country}`);
+                        const cache = await caches.open("my-cache");
+                        await cache.put('location-data', new Response(JSON.stringify(data)));
+                      
                     } else {
                         console.log('No results found.', data);
                     }
                 })
-                .catch((error) => {
+                .catch(async (error) => {
                     console.log('Error occurred while geocoding:', error);
                 });
         }, error => {
+            getCacheLocation()
             console.error(error)
         }, {
             timeout: 2000,
             maximumAge: 20000,
             enableHighAccuracy: true
         })
+    }
+    async function getCacheLocation() {
+        const cacheResponse = await caches.match('location-data');
+        if (cacheResponse) {
+            const cachedData = await cacheResponse.json();
+            if (cachedData.status === 'OK') {
+                const addressComponents = cachedData.results[0].address_components;
+                let state = '';
+                let country = '';
+
+                for (let i = 0; i < addressComponents.length; i++) {
+                    const types = addressComponents[i].types;
+                    if (types.includes('administrative_area_level_1')) {
+                        state = addressComponents[i].long_name;
+                    } else if (types.includes('country')) {
+                        country = addressComponents[i].long_name;
+                    }
+                }
+
+                setLocation(`${state}, ${country}`);
+            } else {
+                console.log('No results found.', cachedData);
+            }
+        } else {
+            console.log('No cached Location available');
+        }
     }
     async function getFeeds() {
         const feedCol = collection(db, 'feed')
@@ -536,44 +583,44 @@ export default function Feed() {
                         />
                     </div>
                     <div className="CropA">
-                    <div className="ZoomRotate">
-                        <div className="zoom">
-                            <label htmlFor="">Zoom</label>
-                    <input type="range" value={zoom} onChange={(e)=>{
-                        setZoom(e.target.value)
-                    }} min="1" max="10" step={1} className="slider" id="myRange"/>
-                     <div className="insSpan">
-                            <span>0</span>
-                            <span>10x</span>
+                        <div className="ZoomRotate">
+                            <div className="zoom">
+                                <label htmlFor="">Zoom</label>
+                                <input type="range" value={zoom} onChange={(e) => {
+                                    setZoom(e.target.value)
+                                }} min="1" max="10" step={1} className="slider" id="myRange" />
+                                <div className="insSpan">
+                                    <span>0</span>
+                                    <span>10x</span>
+                                </div>
+                            </div>
+                            <div className="rotate">
+                                <label htmlFor="">Rotate</label>
+                                <input type="range" value={rotation} onChange={(e) => {
+                                    setRotation(e.target.value)
+                                }} min="0" max="360" step={1} className="slider" id="myRange" />
+                                <div className="insSpan">
+                                    <span>0</span>
+                                    <span>360 Deg</span>
+                                </div>
+                            </div>
                         </div>
+                        <div className="cropButton">
+                            <button onClick={() => {
+                                handleImageEditClose()
+                                if (editPostModal && editId) {
+                                    let postObj = structuredClone(editId);
+                                    postObj.data.image = null;
+                                    setEditId(postObj)
+                                }
+                                else {
+                                    let postObj = structuredClone(newPost);
+                                    postObj.image = null;
+                                    setNewPost(postObj)
+                                }
+                            }}>Cancel</button>
+                            <button onClick={showCroppedImage}>Crop</button>
                         </div>
-                        <div className="rotate">
-                            <label htmlFor="">Rotate</label>
-                        <input type="range" value={rotation} onChange={(e)=>{
-                        setRotation(e.target.value)
-                    }} min="0" max="360" step={1} className="slider" id="myRange"/>
-                        <div className="insSpan">
-                            <span>0</span>
-                            <span>360 Deg</span>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="cropButton">
-                        <button onClick={() => {
-                            handleImageEditClose()
-                            if (editPostModal && editId) {
-                                let postObj = structuredClone(editId);
-                                postObj.data.image = null;
-                                setEditId(postObj)
-                            }
-                            else {
-                                let postObj = structuredClone(newPost);
-                                postObj.image = null;
-                                setNewPost(postObj)
-                            }
-                        }}>Cancel</button>
-                        <button onClick={showCroppedImage}>Crop</button>
-                    </div>
                     </div>
                 </div>
             </Modal>

@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react'
 export default function Location() {
     const [location, setLocation] = useState(null)
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition(position => {
-            console.log(position)
+        getNavigation()
+    }, [])
+    async function getNavigation() {
+        navigator.geolocation.getCurrentPosition(async position => {
             setLocation(position)
         }, error => {
             console.error(error)
@@ -14,7 +16,8 @@ export default function Location() {
             maximumAge: 20000,
             enableHighAccuracy: true
         })
-    }, [])
+    }
+    console.log(location);
     function timeConverter(UNIX_timestamp) {
         var a = new Date(UNIX_timestamp);
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

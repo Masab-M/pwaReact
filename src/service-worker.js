@@ -68,7 +68,13 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
-
+self.addEventListener('sync', event => {
+  if (event.tag === 'fetch-feeds') {
+      event.waitUntil(()=>{
+        alert('online')
+      });
+  }
+});
 // Any other custom service worker logic can go here.
 // src/service-worker.js
 // const CACHE_NAME = 'my-cache';
