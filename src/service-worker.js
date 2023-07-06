@@ -74,6 +74,7 @@ self.addEventListener('message', (event) => {
 const CACHE_NAME = 'my-cache';
 
 self.addEventListener('fetch', event => {
+  console.log('fetch');
   event.respondWith(
     (async () => {
       try {
