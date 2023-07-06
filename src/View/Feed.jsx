@@ -153,6 +153,8 @@ export default function Feed() {
                 data: doc.data()
             }
         })
+        const cache = await caches.open("my-cache");
+        await cache.put('firebase-data', new Response(JSON.stringify(feedList)));
         return feedList;
     }
     async function openCamera() {

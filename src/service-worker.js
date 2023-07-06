@@ -70,3 +70,35 @@ self.addEventListener('message', (event) => {
 });
 
 // Any other custom service worker logic can go here.
+// src/service-worker.js
+const CACHE_NAME = 'my-cache';
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    (async () => {
+      try {
+        // Handle Firebase requests
+        if (event.request.url.startsWith('https://firestore.googleapis.com/v1/projects/social-feed-6e918/databases')) {
+          const cache = await caches.open(CACHE_NAME);
+          const cacheResponse = await cache.match('firebase-data');
+          if (cacheResponse) {
+            return cacheResponse;
+          } else {
+            const response = await fetch(event.request);
+            await cache.put('firebase-data', response.clone());
+            return response;
+          }
+        }
+
+        // Handle other requests
+        // const response = await fetch(event.request);
+        // const cache = await caches.open(CACHE_NAME);
+        // await cache.put(event.request, response.clone());
+        // return response;
+      } catch (error) {
+        const cacheResponse = await caches.match(event.request);
+        return cacheResponse;
+      }
+    })()
+  );
+});
