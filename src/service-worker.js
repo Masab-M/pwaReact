@@ -68,6 +68,15 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+self.addEventListener("sync", (event) => {
+  if (event.tag === "feedRefresh") {
+    event.waitUntil(()=>{
+      console.log('====================================');
+      console.log('sync online');
+      console.log('====================================');
+    });
+  }
+});
 // self.addEventListener('sync', event => {
 //   if (event.tag === 'feedRefresh') {
 //       event.waitUntil(()=>{
