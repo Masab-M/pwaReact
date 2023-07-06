@@ -103,14 +103,14 @@ export default function Feed() {
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
-            // navigator.serviceWorker.ready.then((reg)=>{
-            //     console.log(reg);
-            //     reg.sync.register('feedRefresh').then(()=>{
-            //         console.log("sync register");
-            //     })
-            // }).catch(()=>{
-            //     console.log('it broke');
-            // })
+            navigator.serviceWorker.ready.then((reg)=>{
+                console.log(reg);
+                reg.sync.register('feedRefresh').then(()=>{
+                    console.log("sync register");
+                })
+            }).catch(()=>{
+                console.log('it broke');
+            })
         }).catch(async(err) => {
            
             getFeedCache()
