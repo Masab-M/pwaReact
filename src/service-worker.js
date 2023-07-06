@@ -88,7 +88,7 @@ self.addEventListener("sync", (event) => {
 
 function sendOutboxMessages() {
   // Implement your logic to send outbox messages here
-  alert('done')
+  console.log('Success Sync')
 }
 // self.addEventListener('sync', event => {
 //   if (event.tag === 'feedRefresh') {
