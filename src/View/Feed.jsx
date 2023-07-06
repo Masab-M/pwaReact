@@ -104,7 +104,7 @@ export default function Feed() {
             setPosts(data)
            
         }).catch(async(err) => {
-            handleSyncClick("sync-messages")
+            handleSyncClick("feedRefresh")
             getFeedCache()
         })
     }, [refresh])
