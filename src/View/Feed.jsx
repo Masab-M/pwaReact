@@ -104,22 +104,15 @@ export default function Feed() {
             setPosts(data)
            
         }).catch(async(err) => {
-            navigator.serviceWorker.ready.then((reg)=>{
-                console.log(reg);
-                reg.sync.register('feedRefresh').then(()=>{
-                    console.log("sync register");
-                })
-            }).catch(()=>{
-                console.log('it broke');
-            })
+            handleSyncClick("sync-messages")
             getFeedCache()
         })
     }, [refresh])
-    const handleSyncClick = () => {
+    const handleSyncClick = (tagName) => {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
           navigator.serviceWorker.ready
             .then((registration) => {
-              return registration.sync.register('sync-messages');
+              return registration.sync.register(tagName);
             })
             .then(() => {
               console.log('Sync registered');
@@ -497,7 +490,9 @@ export default function Feed() {
     };
     return (
         <div>
-            <button onClick={handleSyncClick}>Trigger Sync</button>
+            <button onClick={()=>{
+                handleSyncClick("sync-messages")
+            }}>Trigger Sync</button>
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
                 <div className="newPostPopup">
                     <form ref={newPostRef} action="" onSubmit={handlePostForm}>

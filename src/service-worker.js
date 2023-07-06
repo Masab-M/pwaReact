@@ -73,22 +73,18 @@ self.addEventListener("sync", (event) => {
   console.log('sync');
   console.log('====================================');
   if (event.tag === "feedRefresh") {
-    event.waitUntil(()=>{
-      console.log('====================================');
-      console.log('sync online');
-      console.log('====================================');
-    });
+    event.waitUntil(sendOutboxMessages("feedRefresh"));
   }
 });
 self.addEventListener("sync", (event) => {
   if (event.tag === "sync-messages") {
-    event.waitUntil(sendOutboxMessages());
+    event.waitUntil(sendOutboxMessages("sync-messages"));
   }
 });
 
-function sendOutboxMessages() {
+function sendOutboxMessages(tag) {
   // Implement your logic to send outbox messages here
-  console.log('Success Sync')
+  console.log('Success Sync ',tag)
 }
 // self.addEventListener('sync', event => {
 //   if (event.tag === 'feedRefresh') {
