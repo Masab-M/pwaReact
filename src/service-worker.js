@@ -69,7 +69,7 @@ self.addEventListener('message', (event) => {
   }
 });
 self.addEventListener('sync', event => {
-  if (event.tag === 'fetch-feeds') {
+  if (event.tag === 'feedRefresh') {
       event.waitUntil(()=>{
         alert('online')
       });
