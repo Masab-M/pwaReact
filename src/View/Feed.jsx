@@ -102,6 +102,8 @@ export default function Feed() {
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
+           
+        }).catch(async(err) => {
             navigator.serviceWorker.ready.then((reg)=>{
                 console.log(reg);
                 reg.sync.register('feedRefresh').then(()=>{
@@ -110,8 +112,6 @@ export default function Feed() {
             }).catch(()=>{
                 console.log('it broke');
             })
-        }).catch(async(err) => {
-           
             getFeedCache()
         })
     }, [refresh])
