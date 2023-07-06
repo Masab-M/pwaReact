@@ -72,23 +72,22 @@ export default function Feed() {
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
 
     useEffect(() => {
-        console.log('done');
-        if ('serviceWorker' in navigator && 'SyncManager' in window) {
-            console.log('if');
-            navigator.serviceWorker.ready.then(function(reg) {
-              return reg.sync.register('feed');
-            }).catch(function() {
-              // system was unable to register for a sync,
-              // this could be an OS-level restriction
-                console.log('supported');
+        // if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        //     console.log('if');
+        //     navigator.serviceWorker.ready.then(function(reg) {
+        //       return reg.sync.register('feed');
+        //     }).catch(function() {
+        //       // system was unable to register for a sync,
+        //       // this could be an OS-level restriction
+        //         console.log('supported');
 
-            //   postDataFromThePage();
-            });
-          } else {
-            // serviceworker/sync not supported
-            console.log('not supported');
-            // postDataFromThePage();
-          }
+        //     //   postDataFromThePage();
+        //     });
+        //   } else {
+        //     // serviceworker/sync not supported
+        //     console.log('not supported');
+        //     // postDataFromThePage();
+        //   }
         findLocation()
         // displayNotification()
 
