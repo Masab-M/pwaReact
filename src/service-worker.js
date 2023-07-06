@@ -69,6 +69,9 @@ self.addEventListener('message', (event) => {
   }
 });
 self.addEventListener("sync", (event) => {
+  console.log('====================================');
+  console.log('sync');
+  console.log('====================================');
   if (event.tag === "feedRefresh") {
     event.waitUntil(()=>{
       console.log('====================================');

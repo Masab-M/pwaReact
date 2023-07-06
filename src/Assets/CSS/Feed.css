@@ -1,14 +1,15 @@
 .addFeed button {
+    margin-left: auto;
     gap: 5px;
     display: flex;
     cursor: pointer;
-    width: 100%;
+    width: fit-content;
     background-color: #7C74ED;
     border: none;
     color: #fff;
     border-radius: 20px;
-    padding: 10px;
-    justify-content: center;
+    padding: 10px 20px;
+    justify-content: flex-end;
     align-items: center;
 }
 
