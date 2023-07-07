@@ -546,7 +546,7 @@ export default function Feed() {
             newObj.data.image =blob;
             setEditId(newObj)
             if (!imageEdited) {
-                editPost(editId.data.image)
+                editPost(newObj)
             }
             else {
                 uploadFile(newObj)
