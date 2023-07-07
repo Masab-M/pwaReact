@@ -93,6 +93,9 @@ self.clients.matchAll().then(clients => {
           console.log('post');
           console.log('====================================');
           client.postMessage({ tag: tag, message: 'Sync event completed' });
+          console.log('====================================');
+          console.log('post send');
+          console.log('====================================');
         });
       });
 }

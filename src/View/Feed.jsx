@@ -110,6 +110,12 @@ export default function Feed() {
         })
     }, [refresh])
     useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', event => {
+              // Handle the received message from the service worker
+              console.log('Received message from service worker:', event.data);
+            });
+          }
         // Event listener to handle post message from service worker
         const handleMessage = (event) => {
           if (event.data.tag === 'feedRefresh') {
