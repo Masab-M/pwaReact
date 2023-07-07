@@ -85,7 +85,13 @@ function sendFeedMessage(tag){
   console.log('Success Sync Feed ',tag)
   
 self.clients.matchAll().then(clients => {
+  console.log('====================================');
+  console.log("match");
+  console.log('====================================');
         clients.forEach(client => {
+          console.log('====================================');
+          console.log('post');
+          console.log('====================================');
           client.postMessage({ tag: tag, message: 'Sync event completed' });
         });
       });
