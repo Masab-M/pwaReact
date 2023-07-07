@@ -4,7 +4,7 @@ import { BsFiles, BsPhoneFlip } from "react-icons/bs"
 import { IoMdFlash, IoMdFlashOff } from "react-icons/io"
 import { GrClose } from "react-icons/gr"
 import firebase from '../Utils/Firebase'
-import { getFirestore, collection, getDocs, addDoc, query, orderBy, doc, deleteDoc, setDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, query, orderBy, doc, deleteDoc, setDoc, updateDoc } from 'firebase/firestore/lite';
 import { BiImageAdd } from "react-icons/bi"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import "../Assets/CSS/Feed.css"
@@ -111,7 +111,6 @@ export default function Feed() {
         })
     }, [refresh])
     useEffect(() => {
-       
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', event => {
               // Handle the received message from the service worker
@@ -120,32 +119,41 @@ export default function Feed() {
                 notifyMe("Back Online")
                 setPosts([])
                 setRefresh(!refresh)
+                findLocation()
               }
               if(event.data.tag==="newPostSync")
               {
                 notifyMe("Back Online")
-                getIndexDBData().then((res)=>{
-                    if(res.length>0)
-                    {
-                        res.forEach((p)=>{
-                            let newObj={
-                                indexid:p.id,
-                                heading:p.heading,
-                                content:p.content,
-                                image:p.image,
-                            }
-                            setNewPost(newObj)
-                            uploadFile()
-                        })
-                    }
-                })
+                SyncData()
                 console.log("get data");
               }
             });
           }
       }, []);
+      async function SyncData() {
+        getIndexDBData().then((res)=>{
+            if(res.length>0)
+            {
+                res.forEach( (p)=>{
+                    setNewPost(null);
+                    let newObj={
+                        indexid:p.id,
+                        heading:p.heading,
+                        content:p.content,
+                        image:p.image,
+                    }
+                    console.log(newObj);
+                    setNewPost({
+                        ...newObj
+                    })
+                    uploadFile(newObj)
+                })
+            }
+        })
+      }
+      console.log(newPost);
       async function deleteIndexRow(id) {
-        await db.posts.delete(id)
+        await indexDB.posts.delete(id)
       }
       async function getIndexDBData() {
         const posts = await indexDB.posts.toArray();
@@ -226,7 +234,6 @@ export default function Feed() {
                                 country = addressComponents[i].long_name;
                             }
                         }
-
                         setLocation(`${state}, ${country}`);
                         const cache = await caches.open("my-cache");
                         await cache.put('location-data', new Response(JSON.stringify(data)));
@@ -275,8 +282,8 @@ export default function Feed() {
     }
     async function getFeeds() {
         const feedCol = collection(db, 'feed')
-        const query1 = query(feedCol);
-        const feedSnapshot = await getDocs(query1, orderBy('timestamp', 'desc'))
+        const query1 = query(feedCol,orderBy('timestamp', 'desc'));
+        const feedSnapshot = await getDocs(query1)
         console.log(feedSnapshot);
         const feedList = feedSnapshot.docs.map((doc) => {
             return {
@@ -367,46 +374,46 @@ export default function Feed() {
         handleImageEditShow()
     }
 
-    async function uploadFile() {
+    async function uploadFile(obj) {
         const storage = getStorage();
-        const metadata = {
-            contentType: 'image/jpeg',
-        };
-        const storageRef = ref(storage, `images/${Date.now()}.jpg`, metadata);
+        const storageRef = ref(storage, `images/${Date.now()}.jpg`);
         // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
-        uploadBytes(storageRef, (editPostModal && editId) ? editId.data.image : newPost.image).then((snapshot) => {
+        await uploadBytes(storageRef, (editPostModal) ? obj.data.image : obj.image).then((snapshot) => {
             console.log('Uploaded a blob or file!', snapshot);
             getDownloadURL(snapshot.ref).then((downloadURL) => {
                 console.log('File available at', downloadURL);
                 notifyMe("File Uploaded Successfully")
+                
                 if (editPostModal && editId) {
-                    editPost(downloadURL)
+                    obj.data.image=downloadURL
+                    editPost(obj)
                 }
                 else {
-                    addPost(downloadURL)
+                    obj.image=downloadURL;
+                    addPost(obj)
                 }
             });
         });
     }
-    async function addPost(imageUrl) {
+    async function addPost(obj) {
         console.log({
-            image: imageUrl,
-            content: newPost.content,
-            heading: newPost.heading,
+            image: obj.image,
+            content: obj.content,
+            heading: obj.heading,
             location: location,
             timestamp: Date.now()
         });
         const docRef = await addDoc(collection(db, "feed"), {
-            image: imageUrl,
-            content: newPost.content,
-            heading: newPost.heading,
+            image: obj.image,
+            content: obj.content,
+            heading: obj.heading,
             location: location,
             timestamp: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
-        if(newPost.indexid)
+        if(obj.indexid)
         {
-            deleteIndexRow(newPost.indexid).then((res)=>{
+            deleteIndexRow(obj.indexid).then((res)=>{
                 setRefresh(!refresh)
                 setNewPost({})
                 notifyMe("Post Added Successfully")
@@ -421,25 +428,26 @@ export default function Feed() {
             notifyMe("Post Added Successfully")
         }
     }
-    async function editPost(imageurl) {
+    async function editPost(obj) {
         const docRef = doc(db, "feed", editId.id);
         console.log({
-            image: imageurl,
-            content: editId.data.content,
-            heading: editId.data.heading,
+            image: obj.data.image,
+            content: obj.data.content,
+            heading: obj.data.heading,
         });
         const data = {
-            image: imageurl,
-            content: editId.data.content,
-            heading: editId.data.heading,
+            image: obj.data.image,
+            content: obj.data.content,
+            heading: obj.data.heading,
         };
-        setDoc(docRef, data)
+        updateDoc(docRef, data)
             .then(docRef => {
                 console.log("Entire Document has been updated successfully", docRef);
                 handleEditClose();
                 setRefresh(!refresh)
                 setAddingPost(false)
                 setEditId(null)
+                setImageEdited(false)
                 notifyMe("Post Edited Successfully")
             })
             .catch(error => {
@@ -479,7 +487,7 @@ export default function Feed() {
                 }
             }
             else{
-                uploadFile()
+                uploadFile(newObj)
                 setAddingPost(true)
             }
         }
@@ -531,7 +539,7 @@ export default function Feed() {
     async function handleEditForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.data.image) {
-            let blob = await fetch(editId.data.image).then(r => r.blob());
+            let blob = !imageEdited? editId.data.image : await fetch(editId.data.image).then(r => r.blob());
             let newObj = editId;
             newObj.data.heading = e.target[0].value;
             newObj.data.content = e.target[1].value;
@@ -541,7 +549,7 @@ export default function Feed() {
                 editPost(editId.data.image)
             }
             else {
-                uploadFile()
+                uploadFile(newObj)
             }
             setAddingPost(true)
         }
