@@ -75,12 +75,32 @@ self.addEventListener("sync", (event) => {
   if (event.tag === "feedRefresh") {
     event.waitUntil(sendFeedMessage("feedRefresh"));
   }
+  if (event.tag === "newPostSync") {
+    event.waitUntil(sendFeedMessage("newPostSync"));
+  }
 });
 self.addEventListener("sync", (event) => {
   if (event.tag === "sync-messages") {
     event.waitUntil(sendOutboxMessages("sync-messages"));
   }
 });
+function sendNewPostMessage(tag){
+  console.log('Success Sync Post ',tag)
+self.clients.matchAll().then(clients => {
+  console.log('====================================');
+  console.log("match");
+  console.log('====================================');
+        clients.forEach(client => {
+          console.log('====================================');
+          console.log('post');
+          console.log('====================================');
+          client.postMessage({ tag: tag, message: 'Sync event completed' });
+          console.log('====================================');
+          console.log('post send');
+          console.log('====================================');
+        });
+      });
+}
 function sendFeedMessage(tag){
   console.log('Success Sync Feed ',tag)
   

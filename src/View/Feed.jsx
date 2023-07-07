@@ -11,7 +11,8 @@ import "../Assets/CSS/Feed.css"
 import Modal from '../Partials/Modal'
 import Cropper from 'react-easy-crop'
 import getCroppedImg from '../Partials/Crop/GetCropImage'
-
+import { useLiveQuery } from "dexie-react-hooks";
+import { indexDB } from "../Utils/indexdb";
 export default function Feed() {
     const db = getFirestore(firebase);
     const [posts, setPosts] = useState([])
@@ -115,8 +116,14 @@ export default function Feed() {
               // Handle the received message from the service worker
               console.log('Received message from service worker:', event.data);
               if(event.data.tag==="feedRefresh"){
+                notifyMe("Back Online")
                 setPosts([])
                 setRefresh(!refresh)
+              }
+              if(event.data.tag==="newPostSync")
+              {
+                notifyMe("Back Online")
+                console.log("get data");
               }
             });
           }
@@ -405,7 +412,7 @@ export default function Feed() {
                 console.log(error);
             })
     }
-    function handlePostForm(e) {
+    async function handlePostForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && newPost.image) {
             let newObj = newPost;
@@ -413,8 +420,31 @@ export default function Feed() {
             newObj.content = e.target[1].value;
             console.log('log', newObj);
             setNewPost(newObj)
-            uploadFile()
-            setAddingPost(true)
+            if(!navigator.onLine)
+            {
+                try {
+                    console.log({  heading:e.target[0].value,
+                        content:e.target[1].value,
+                        image:newPost.image,
+                        location:location,});
+                    await indexDB.posts.add({
+                        heading:e.target[0].value,
+                        content:e.target[1].value,
+                        image:newPost.image,
+                        location:location,
+                    })
+                    e.target.reset();
+                    handleNewPostClose();
+                    setNewPost({})
+                    handleSyncClick("newPostSync")
+                } catch (error) {
+                    console.log(`Failed to add : ${error}`);
+                }
+            }
+            else{
+                uploadFile()
+                setAddingPost(true)
+            }
         }
         else {
             setFormErr(true)
