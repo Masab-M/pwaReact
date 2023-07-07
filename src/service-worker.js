@@ -12,6 +12,7 @@ import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
+import { getFeeds } from './View/Feed';
 
 clientsClaim();
 
@@ -73,7 +74,7 @@ self.addEventListener("sync", (event) => {
   console.log('sync');
   console.log('====================================');
   if (event.tag === "feedRefresh") {
-    event.waitUntil(sendOutboxMessages("feedRefresh"));
+    event.waitUntil(getfeedsMessage("feedRefresh"));
   }
 });
 self.addEventListener("sync", (event) => {
@@ -81,7 +82,18 @@ self.addEventListener("sync", (event) => {
     event.waitUntil(sendOutboxMessages("sync-messages"));
   }
 });
+function getfeedsMessage(tag){
+  console.log('Success Sync Message ',tag)
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({
+        type: 'feedonline',
+        data: "messages"
+      });
+    });
+  });
 
+}
 function sendOutboxMessages(tag) {
   // Implement your logic to send outbox messages here
   console.log('Success Sync ',tag)

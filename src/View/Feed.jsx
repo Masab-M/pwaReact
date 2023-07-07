@@ -11,6 +11,7 @@ import "../Assets/CSS/Feed.css"
 import Modal from '../Partials/Modal'
 import Cropper from 'react-easy-crop'
 import getCroppedImg from '../Partials/Crop/GetCropImage'
+
 export default function Feed() {
     const db = getFirestore(firebase);
     const [posts, setPosts] = useState([])
@@ -108,6 +109,21 @@ export default function Feed() {
             getFeedCache()
         })
     }, [refresh])
+    useEffect(() => {
+        const channel = new BroadcastChannel('syncChannel');
+        channel.onmessage = (event) => {
+          if (event.data.type === 'feedonline') {
+            setRefresh(!refresh)
+            console.log('====================================');
+            console.log('refresh');
+            console.log('====================================');
+          }
+        };
+    
+        return () => {
+          channel.close();
+        };
+      }, []);
     const handleSyncClick = (tagName) => {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
           navigator.serviceWorker.ready
