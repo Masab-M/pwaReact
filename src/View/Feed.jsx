@@ -114,25 +114,11 @@ export default function Feed() {
             navigator.serviceWorker.addEventListener('message', event => {
               // Handle the received message from the service worker
               console.log('Received message from service worker:', event.data);
+              if(event.data.tag==="feedRefresh"){
+                setRefresh(!refresh)
+              }
             });
           }
-        // Event listener to handle post message from service worker
-        const handleMessage = (event) => {
-          if (event.data.tag === 'feedRefresh') {
-            setRefresh(!refresh)
-            console.log('====================================');
-            console.log("refresh");
-            console.log('====================================');
-          }
-        };
-    
-        // Add the event listener when the component mounts
-        window.addEventListener('message', handleMessage);
-    
-        // Clean up the event listener when the component unmounts
-        return () => {
-          window.removeEventListener('message', handleMessage);
-        };
       }, []);
     // useEffect(() => {
     //     const channel = new BroadcastChannel('syncChannel');
