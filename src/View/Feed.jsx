@@ -111,6 +111,7 @@ export default function Feed() {
         })
     }, [refresh])
     useEffect(() => {
+       
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', event => {
               // Handle the received message from the service worker
@@ -123,11 +124,34 @@ export default function Feed() {
               if(event.data.tag==="newPostSync")
               {
                 notifyMe("Back Online")
+                getIndexDBData().then((res)=>{
+                    if(res.length>0)
+                    {
+                        res.forEach((p)=>{
+                            let newObj={
+                                indexid:p.id,
+                                heading:p.heading,
+                                content:p.content,
+                                image:p.image,
+                            }
+                            setNewPost(newObj)
+                            uploadFile()
+                        })
+                    }
+                })
                 console.log("get data");
               }
             });
           }
       }, []);
+      async function deleteIndexRow(id) {
+        await db.posts.delete(id)
+      }
+      async function getIndexDBData() {
+        const posts = await indexDB.posts.toArray();
+        // Return result
+        return posts;
+      }
     // useEffect(() => {
     //     const channel = new BroadcastChannel('syncChannel');
     //     channel.onmessage = (event) => {
@@ -349,8 +373,8 @@ export default function Feed() {
             contentType: 'image/jpeg',
         };
         const storageRef = ref(storage, `images/${Date.now()}.jpg`, metadata);
-        let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
-        uploadBytes(storageRef, blob).then((snapshot) => {
+        // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
+        uploadBytes(storageRef, (editPostModal && editId) ? editId.data.image : newPost.image).then((snapshot) => {
             console.log('Uploaded a blob or file!', snapshot);
             getDownloadURL(snapshot.ref).then((downloadURL) => {
                 console.log('File available at', downloadURL);
@@ -380,12 +404,22 @@ export default function Feed() {
             timestamp: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
-        setRefresh(!refresh)
-        newPostRef.current.reset();
-        handleNewPostClose()
-        setAddingPost(false)
-        setNewPost({})
-        notifyMe("Post Added Successfully")
+        if(newPost.indexid)
+        {
+            deleteIndexRow(newPost.indexid).then((res)=>{
+                setRefresh(!refresh)
+                setNewPost({})
+                notifyMe("Post Added Successfully")
+            })
+        }
+        else{
+            setRefresh(!refresh)
+            newPostRef.current.reset();
+            handleNewPostClose()
+            setAddingPost(false)
+            setNewPost({})
+            notifyMe("Post Added Successfully")
+        }
     }
     async function editPost(imageurl) {
         const docRef = doc(db, "feed", editId.id);
@@ -415,9 +449,11 @@ export default function Feed() {
     async function handlePostForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && newPost.image) {
+            let blob = await fetch(newPost.image).then(r => r.blob());
             let newObj = newPost;
             newObj.heading = e.target[0].value;
             newObj.content = e.target[1].value;
+            newObj.image=blob
             console.log('log', newObj);
             setNewPost(newObj)
             if(!navigator.onLine)
@@ -425,12 +461,13 @@ export default function Feed() {
                 try {
                     console.log({  heading:e.target[0].value,
                         content:e.target[1].value,
-                        image:newPost.image,
-                        location:location,});
+                        image:blob,
+                        location:location,
+                    });
                     await indexDB.posts.add({
                         heading:e.target[0].value,
                         content:e.target[1].value,
-                        image:newPost.image,
+                        image:blob,
                         location:location,
                     })
                     e.target.reset();
@@ -491,14 +528,15 @@ export default function Feed() {
             });
         }
     }
-    function handleEditForm(e) {
+    async function handleEditForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.data.image) {
+            let blob = await fetch(editId.data.image).then(r => r.blob());
             let newObj = editId;
             newObj.data.heading = e.target[0].value;
             newObj.data.content = e.target[1].value;
+            newObj.data.image =blob;
             setEditId(newObj)
-            console.log(e.target[0].value);
             if (!imageEdited) {
                 editPost(editId.data.image)
             }
