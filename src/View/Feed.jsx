@@ -109,21 +109,21 @@ export default function Feed() {
             getFeedCache()
         })
     }, [refresh])
-    useEffect(() => {
-        const channel = new BroadcastChannel('syncChannel');
-        channel.onmessage = (event) => {
-          if (event.data.type === 'feedonline') {
-            setRefresh(!refresh)
-            console.log('====================================');
-            console.log('refresh');
-            console.log('====================================');
-          }
-        };
+    // useEffect(() => {
+    //     const channel = new BroadcastChannel('syncChannel');
+    //     channel.onmessage = (event) => {
+    //       if (event.data.type === 'feedonline') {
+    //         setRefresh(!refresh)
+    //         console.log('====================================');
+    //         console.log('refresh');
+    //         console.log('====================================');
+    //       }
+    //     };
     
-        return () => {
-          channel.close();
-        };
-      }, []);
+    //     return () => {
+    //       channel.close();
+    //     };
+    //   }, []);
     const handleSyncClick = (tagName) => {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
           navigator.serviceWorker.ready
