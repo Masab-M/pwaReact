@@ -109,6 +109,25 @@ export default function Feed() {
             getFeedCache()
         })
     }, [refresh])
+    useEffect(() => {
+        // Event listener to handle post message from service worker
+        const handleMessage = (event) => {
+          if (event.data.tag === 'feedRefresh') {
+            setRefresh(!refresh)
+            console.log('====================================');
+            console.log("refresh");
+            console.log('====================================');
+          }
+        };
+    
+        // Add the event listener when the component mounts
+        window.addEventListener('message', handleMessage);
+    
+        // Clean up the event listener when the component unmounts
+        return () => {
+          window.removeEventListener('message', handleMessage);
+        };
+      }, []);
     // useEffect(() => {
     //     const channel = new BroadcastChannel('syncChannel');
     //     channel.onmessage = (event) => {

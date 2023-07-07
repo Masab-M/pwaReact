@@ -73,7 +73,7 @@ self.addEventListener("sync", (event) => {
   console.log('sync');
   console.log('====================================');
   if (event.tag === "feedRefresh") {
-    event.waitUntil(sendOutboxMessages("feedRefresh"));
+    event.waitUntil(sendFeedMessage("feedRefresh"));
   }
 });
 self.addEventListener("sync", (event) => {
@@ -81,7 +81,15 @@ self.addEventListener("sync", (event) => {
     event.waitUntil(sendOutboxMessages("sync-messages"));
   }
 });
-
+function sendFeedMessage(tag){
+  console.log('Success Sync Feed ',tag)
+  
+self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ tag: tag, message: 'Sync event completed' });
+        });
+      });
+}
 function sendOutboxMessages(tag) {
   // Implement your logic to send outbox messages here
   console.log('Success Sync ',tag)
