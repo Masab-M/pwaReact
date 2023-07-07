@@ -115,6 +115,7 @@ export default function Feed() {
               // Handle the received message from the service worker
               console.log('Received message from service worker:', event.data);
               if(event.data.tag==="feedRefresh"){
+                setPosts([])
                 setRefresh(!refresh)
               }
             });
