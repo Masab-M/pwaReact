@@ -399,7 +399,7 @@ export default function Feed() {
             image: obj.image,
             content: obj.content,
             heading: obj.heading,
-            location: location,
+            location: location===""?obj.location:location,
             timestamp: Date.now()
         });
         const docRef = await addDoc(collection(db, "feed"), {
@@ -529,7 +529,7 @@ export default function Feed() {
             Notification.requestPermission().then((permission) => {
                 // If the user accepts, let's create a notification
                 if (permission === "granted") {
-                    const notification = new Notification("Hi there!");
+                    const notification = new Notification("Notification will Show like this");
                     // …
                 }
             });
