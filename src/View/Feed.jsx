@@ -104,8 +104,8 @@ export default function Feed() {
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
-           
-        }).catch(async(err) => {
+
+        }).catch(async (err) => {
             handleSyncClick("feedRefresh")
             getFeedCache()
         })
@@ -113,34 +113,33 @@ export default function Feed() {
     useEffect(() => {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', event => {
-              // Handle the received message from the service worker
-              console.log('Received message from service worker:', event.data);
-              if(event.data.tag==="feedRefresh"){
-                notifyMe("Back Online")
-                setPosts([])
-                setRefresh(!refresh)
-                findLocation()
-              }
-              if(event.data.tag==="newPostSync")
-              {
-                notifyMe("Back Online")
-                SyncData()
-                console.log("get data");
-              }
+                // Handle the received message from the service worker
+                console.log('Received message from service worker:', event.data);
+                if (event.data.tag === "feedRefresh") {
+                    notifyMe("Back Online")
+                    setPosts([])
+                    setRefresh(!refresh)
+                    findLocation()
+                }
+                if (event.data.tag === "newPostSync") {
+                    notifyMe("Back Online")
+                    SyncData()
+                    console.log("get data");
+                }
             });
-          }
-      }, []);
-      async function SyncData() {
-        getIndexDBData().then((res)=>{
-            if(res.length>0)
-            {
-                res.forEach( (p)=>{
+        }
+    }, []);
+    async function SyncData() {
+        getIndexDBData().then((res) => {
+            if (res.length > 0) {
+                res.forEach((p) => {
                     setNewPost(null);
-                    let newObj={
-                        indexid:p.id,
-                        heading:p.heading,
-                        content:p.content,
-                        image:p.image,
+                    let newObj = {
+                        indexid: p.id,
+                        heading: p.heading,
+                        content: p.content,
+                        image: p.image,
+                        location:p.location
                     }
                     console.log(newObj);
                     setNewPost({
@@ -150,16 +149,16 @@ export default function Feed() {
                 })
             }
         })
-      }
-      console.log(newPost);
-      async function deleteIndexRow(id) {
+    }
+    console.log(newPost);
+    async function deleteIndexRow(id) {
         await indexDB.posts.delete(id)
-      }
-      async function getIndexDBData() {
+    }
+    async function getIndexDBData() {
         const posts = await indexDB.posts.toArray();
         // Return result
         return posts;
-      }
+    }
     // useEffect(() => {
     //     const channel = new BroadcastChannel('syncChannel');
     //     channel.onmessage = (event) => {
@@ -170,27 +169,27 @@ export default function Feed() {
     //         console.log('====================================');
     //       }
     //     };
-    
+
     //     return () => {
     //       channel.close();
     //     };
     //   }, []);
     const handleSyncClick = (tagName) => {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
-          navigator.serviceWorker.ready
-            .then((registration) => {
-              return registration.sync.register(tagName);
-            })
-            .then(() => {
-              console.log('Sync registered');
-            })
-            .catch((error) => {
-              console.log('Sync registration failed:', error);
-            });
+            navigator.serviceWorker.ready
+                .then((registration) => {
+                    return registration.sync.register(tagName);
+                })
+                .then(() => {
+                    console.log('Sync registered');
+                })
+                .catch((error) => {
+                    console.log('Sync registration failed:', error);
+                });
         } else {
-          console.log('Background sync is not supported');
+            console.log('Background sync is not supported');
         }
-      };
+    };
     async function getFeedCache() {
         const cacheResponse = await caches.match('firebase-data');
         if (cacheResponse) {
@@ -237,7 +236,7 @@ export default function Feed() {
                         setLocation(`${state}, ${country}`);
                         const cache = await caches.open("my-cache");
                         await cache.put('location-data', new Response(JSON.stringify(data)));
-                      
+
                     } else {
                         console.log('No results found.', data);
                     }
@@ -282,7 +281,7 @@ export default function Feed() {
     }
     async function getFeeds() {
         const feedCol = collection(db, 'feed')
-        const query1 = query(feedCol,orderBy('timestamp', 'desc'));
+        const query1 = query(feedCol, orderBy('timestamp', 'desc'));
         const feedSnapshot = await getDocs(query1)
         console.log(feedSnapshot);
         const feedList = feedSnapshot.docs.map((doc) => {
@@ -383,13 +382,13 @@ export default function Feed() {
             getDownloadURL(snapshot.ref).then((downloadURL) => {
                 console.log('File available at', downloadURL);
                 notifyMe("File Uploaded Successfully")
-                
+
                 if (editPostModal && editId) {
-                    obj.data.image=downloadURL
+                    obj.data.image = downloadURL
                     editPost(obj)
                 }
                 else {
-                    obj.image=downloadURL;
+                    obj.image = downloadURL;
                     addPost(obj)
                 }
             });
@@ -411,15 +410,15 @@ export default function Feed() {
             timestamp: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
-        if(obj.indexid)
-        {
-            deleteIndexRow(obj.indexid).then((res)=>{
+        if (obj.indexid) {
+            deleteIndexRow(obj.indexid).then((res) => {
                 setRefresh(!refresh)
                 setNewPost({})
+                newPostRef.current.reset();
                 notifyMe("Post Added Successfully")
             })
         }
-        else{
+        else {
             setRefresh(!refresh)
             newPostRef.current.reset();
             handleNewPostClose()
@@ -461,22 +460,22 @@ export default function Feed() {
             let newObj = newPost;
             newObj.heading = e.target[0].value;
             newObj.content = e.target[1].value;
-            newObj.image=blob
+            newObj.image = blob
             console.log('log', newObj);
             setNewPost(newObj)
-            if(!navigator.onLine)
-            {
+            if (!navigator.onLine) {
                 try {
-                    console.log({  heading:e.target[0].value,
-                        content:e.target[1].value,
-                        image:blob,
-                        location:location,
+                    console.log({
+                        heading: e.target[0].value,
+                        content: e.target[1].value,
+                        image: blob,
+                        location: location,
                     });
                     await indexDB.posts.add({
-                        heading:e.target[0].value,
-                        content:e.target[1].value,
-                        image:blob,
-                        location:location,
+                        heading: e.target[0].value,
+                        content: e.target[1].value,
+                        image: blob,
+                        location: location,
                     })
                     e.target.reset();
                     handleNewPostClose();
@@ -486,7 +485,7 @@ export default function Feed() {
                     console.log(`Failed to add : ${error}`);
                 }
             }
-            else{
+            else {
                 uploadFile(newObj)
                 setAddingPost(true)
             }
@@ -539,11 +538,11 @@ export default function Feed() {
     async function handleEditForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.data.image) {
-            let blob = !imageEdited? editId.data.image : await fetch(editId.data.image).then(r => r.blob());
+            let blob = !imageEdited ? editId.data.image : await fetch(editId.data.image).then(r => r.blob());
             let newObj = editId;
             newObj.data.heading = e.target[0].value;
             newObj.data.content = e.target[1].value;
-            newObj.data.image =blob;
+            newObj.data.image = blob;
             setEditId(newObj)
             if (!imageEdited) {
                 editPost(newObj)
@@ -594,7 +593,7 @@ export default function Feed() {
     };
     return (
         <div>
-            <button onClick={()=>{
+            <button onClick={() => {
                 handleSyncClick("sync-messages")
             }}>Trigger Sync</button>
             <Modal show={newPostModal} handleClose={handleNewPostClose}>

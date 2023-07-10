@@ -91,12 +91,11 @@
 }
 
 .confirmbuttons button {
-    cursor: pointer;
-    flex: 1;
     border: none;
-    padding: 10px;
     border-radius: 10px;
     color: #fff;
+    cursor: pointer;
+    padding: 10px 30px;
 }
 
 .confirmbuttons button:first-child {
