@@ -233,7 +233,6 @@
 .AppNav {
     position: fixed;
     bottom: 0px;
-z-index:-1;
     height: 50px;
     border-top-right-radius: 20px;
     left: 0px;

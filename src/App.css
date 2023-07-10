@@ -209,6 +209,7 @@ nav .logo {
   left: 0px;
   bottom: 0px;
   width: 100%;
+  z-index: 99;
   height: 100%;
 }
 .addphoto .cameraSection video{
@@ -281,8 +282,6 @@ nav .logo {
   flex-direction: column;
   gap: 20px;
   margin-top: 20px;
-  position: relative;
-  z-index: -9;
   margin-bottom: 30px;
 }
 
