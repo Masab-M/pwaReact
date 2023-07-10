@@ -17,6 +17,7 @@ export default function Feed() {
     const db = getFirestore(firebase);
     const [posts, setPosts] = useState([])
     const newPostRef = useRef(null)
+    const editPostRef=useRef(null)
     const [cameraType, setCameraType] = useState(true)
     const canvasRef = useRef(null)
     const videoRef = useRef(null)
@@ -415,7 +416,7 @@ export default function Feed() {
                 setRefresh(!refresh)
                 setNewPost({})
                 newPostRef.current.reset();
-                notifyMe("Post Added Successfully")
+                notifyMe("Feed Added Successfully")
             })
         }
         else {
@@ -424,7 +425,7 @@ export default function Feed() {
             handleNewPostClose()
             setAddingPost(false)
             setNewPost({})
-            notifyMe("Post Added Successfully")
+            notifyMe("Feed Added Successfully")
         }
     }
     async function editPost(obj) {
@@ -447,7 +448,7 @@ export default function Feed() {
                 setAddingPost(false)
                 setEditId(null)
                 setImageEdited(false)
-                notifyMe("Post Edited Successfully")
+                notifyMe("Feed Edited Successfully")
             })
             .catch(error => {
                 console.log(error);
@@ -559,7 +560,7 @@ export default function Feed() {
     async function deletePost() {
         await deleteDoc(doc(db, "feed", deleteID)).then((res) => {
             console.log('deleted');
-            notifyMe("Post Deleted Successfully")
+            notifyMe("Feed Deleted Successfully")
         })
         handlePostDeleteClose()
         setRefresh(!refresh)
@@ -593,9 +594,6 @@ export default function Feed() {
     };
     return (
         <div>
-            <button onClick={() => {
-                handleSyncClick("sync-messages")
-            }}>Trigger Sync</button>
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
                 <div className="newPostPopup">
                     <form ref={newPostRef} action="" onSubmit={handlePostForm}>
@@ -647,7 +645,7 @@ export default function Feed() {
             </Modal>
             <Modal show={editPostModal} handleClose={handleEditClose}>
                 <div className="newPostPopup">
-                    <form ref={newPostRef} action="" onSubmit={handleEditForm}>
+                    <form ref={editPostRef} action="" onSubmit={handleEditForm}>
                         <div className="contentSection">
                             <div className="title">
                                 <label htmlFor="heading">Heading</label>

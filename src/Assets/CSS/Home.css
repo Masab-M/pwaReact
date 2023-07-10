@@ -1,0 +1,33 @@
+.iconImage img {
+    width: 100px;
+    display: flex;
+    margin: auto;
+}
+
+.iconImage {
+    border-radius: 20px;
+    width: fit-content;
+    height: 100%;
+    margin: auto;
+}
+
+.title {
+    text-align: center;
+}
+
+.iconImage.feedIcon {
+    background: #E4F1FA;
+}
+
+.iconImage.locationIcon {
+    background-color: #f6e7e3;
+}
+
+.tiles .singleTile .title {
+    margin-top: 6px;
+}
+
+.tiles .singleTile .title h4 {
+    font-size: 18px;
+    font-family: 'Nunito Sans';
+}

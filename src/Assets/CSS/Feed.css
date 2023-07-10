@@ -198,3 +198,61 @@
     font-weight: 600;
     padding: 0px 5px;
 }
+
+.title img {
+    margin-left: auto;
+    max-width: 100%;
+    width: 200px;
+    display: flex;
+}
+.postEmpty span {
+    font-size: 14px;
+    font-family: 'Nunito Sans';
+    font-weight: 600;
+}
+
+.postEmpty {
+    text-align: center;
+    margin-top: 40px;
+}
+.newPostPopup form .contentSection .title input#heading {
+    font-family: 'Nunito Sans';
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.newPostPopup form .contentSection  textarea#newPostText {
+    font-size: 14px;
+    font-family: 'Nunito Sans';
+    font-weight: 500;
+}
+
+.contentSection .title {
+    margin-bottom: 0px !important;
+}
+.AppNav {
+    position: fixed;
+    bottom: 0px;
+z-index:-1;
+    height: 50px;
+    border-top-right-radius: 20px;
+    left: 0px;
+    background: #5a05c9;
+    right: 0px;
+    width: 100%;
+    border-top-left-radius: 20px;
+}
+
+.Menulist {
+    display: flex;
+    justify-content: space-around;
+}
+
+.AppMenus {
+    padding: 15px 0px;
+}
+
+.AppScreeen svg {
+    font-size: 20px;
+    color: #fff;
+}

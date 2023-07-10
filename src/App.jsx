@@ -5,7 +5,9 @@ import Feed from './View/Feed';
 import Location from './View/Location';
 import Logo from "./Assets/Images/Progressive_Web_Apps_Logo.svg.png"
 import Home from './View/Home';
-
+import {BiHomeAlt2,BiCurrentLocation} from "react-icons/bi"
+import {CgFeed} from "react-icons/cg"
+import "./Assets/CSS/index.app.css"
 function App() {
   useEffect(() => {
     
@@ -36,6 +38,27 @@ function App() {
         <Route path="location" element={ <Location/> } />
         <Route path="feed" element={ <Feed/> } />
       </Routes>
+      <div className="AppNav">
+        <div className="AppMenus">
+          <div className="Menulist">
+            <div className="AppScreeen">
+              <NavLink to={'/location'}>
+               <BiCurrentLocation/>
+              </NavLink>
+            </div>
+            <div className="AppScreeen">
+            <NavLink to={'/'}>
+              <BiHomeAlt2/>
+              </NavLink>
+            </div>
+            <div className="AppScreeen">
+            <NavLink to={'/feed'}>
+              <CgFeed/>
+              </NavLink>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
