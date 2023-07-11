@@ -550,6 +550,7 @@ export default function Feed() {
                 })
                 handleEditClose();
                 notifyMe("Feed will be edited once system gets online")
+                handleSyncClick("feedRefresh")
             }
             else{
                 if (!imageEdited) {
@@ -573,6 +574,7 @@ export default function Feed() {
             })
             handlePostDeleteClose()
             notifyMe('Feed will be Deleted once system is online.')
+            handleSyncClick("feedRefresh")
         }
         else{
             await deleteDoc(doc(db, "feed", id)).then((res) => {
