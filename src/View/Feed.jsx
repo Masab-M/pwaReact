@@ -101,6 +101,7 @@ export default function Feed() {
               notifyMe("Back Online");
               setPosts([]);
               SyncData();
+              setRefresh(!refresh);
               findLocation();
             }
           };
@@ -128,8 +129,6 @@ export default function Feed() {
                     console.log(newObj);
                     uploadFile(newObj)
                 })
-            }else{
-                setRefresh(!refresh)
             }
         })
     }
@@ -369,7 +368,7 @@ export default function Feed() {
         console.log("Document written with ID: ", docRef.id);
         if (obj.indexid) {
             deleteIndexRow(obj.indexid).then((res) => {
-                setRefresh(!refresh)
+                setRefresh(true)
                 notifyMe("Feed Sync Successfully")
             })
         }
