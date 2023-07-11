@@ -83,7 +83,7 @@ export default function Feed() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
     useEffect(() => {
-        // syncEdit();
+        syncEdit();
 
         getFeeds().then((data) => {
             console.log(data);
@@ -102,7 +102,7 @@ export default function Feed() {
               setPosts([]);
               SyncData();
               syncDelete();
-            //   syncEdit();
+              syncEdit();
               setRefresh(!refresh);
               findLocation();
             }
@@ -121,8 +121,8 @@ export default function Feed() {
                     console.log(res);
                     let newObj = {
                         id:p.postId,
+                        indexid: p.id,
                         data:{
-                            indexid: p.id,
                             heading: p.heading,
                             content: p.content,
                             image: p.image,
@@ -130,7 +130,12 @@ export default function Feed() {
                     }
                     setEditId(newObj)
                     console.log(newObj);
-                    uploadFile(newObj)
+                    if (!(newObj.data.image instanceof Blob)) {
+                        editPost(newObj)
+                    }
+                    else{
+                        uploadFile(newObj,"edit")
+                    }
                 })
             }
         })
@@ -159,12 +164,14 @@ export default function Feed() {
                         location: p.location
                     }
                     console.log(newObj);
-                    uploadFile(newObj)
+                    uploadFile(newObj,"new")
                 })
             }
         })
     }
-    console.log(newPost);
+    async function deleteIndexEditRow(id) {
+        await indexDB.editPosts.delete(id)
+    }
     async function deleteIndexRow(id) {
         await indexDB.posts.delete(id)
     }
@@ -375,17 +382,17 @@ export default function Feed() {
         handleImageEditShow()
     }
 
-    async function uploadFile(obj) {
+    async function uploadFile(obj,form) {
         const storage = getStorage();
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
         // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
-        await uploadBytes(storageRef, (editPostModal) ? obj.data.image : obj.image).then((snapshot) => {
+        await uploadBytes(storageRef, form==="edit" ? obj.data.image : obj.image).then((snapshot) => {
             getDownloadURL(snapshot.ref).then((downloadURL) => {
-                if (editPostModal || editId) {
+                if (form==="edit") {
                     obj.data.image = downloadURL
                     editPost(obj)
                 }
-                else {
+                else if(form==="new") {
                     obj.image = downloadURL;
                     addPost(obj)
                 }
@@ -424,7 +431,7 @@ export default function Feed() {
         }
     }
     async function editPost(obj) {
-        const docRef = doc(db, "feed", editId.id);
+        const docRef = doc(db, "feed", editId?editId.id:obj.id);
         console.log({
             image: obj.data.image,
             content: obj.data.content,
@@ -438,12 +445,20 @@ export default function Feed() {
         updateDoc(docRef, data)
             .then(docRef => {
                 console.log("Entire Document has been updated successfully", docRef);
-                handleEditClose();
-                setRefresh(!refresh)
-                setAddingPost(false)
-                setEditId(null)
-                setImageEdited(false)
-                notifyMe("You have successfully edited the feed.")
+                if (obj.indexid) {
+                    deleteIndexEditRow(obj.indexid).then((res) => {
+                        setRefresh(!refresh)
+                        notifyMe("Your feed has been successfully synced.")
+                    })
+                }
+                else{
+                    setRefresh(!refresh)
+                    handleEditClose();
+                    setAddingPost(false)
+                    setEditId(null)
+                    setImageEdited(false)
+                    notifyMe("You have successfully edited the feed.")
+                }
             })
             .catch(error => {
                 console.log(error);
@@ -483,7 +498,7 @@ export default function Feed() {
                 }
             }
             else {
-                uploadFile(newObj)
+                uploadFile(newObj,"new")
                 setAddingPost(true)
             }
         }
@@ -557,7 +572,7 @@ export default function Feed() {
                     editPost(newObj)
                 }
                 else {
-                    uploadFile(newObj)
+                    uploadFile(newObj,"edit")
                 }
                 setAddingPost(true)
             }
@@ -682,7 +697,7 @@ export default function Feed() {
                             <div className="ContentI">
                                 {
                                     editId !== null && editId.data.image &&
-                                    <img src={editId.data.image} alt="" srcset="" />
+                                    <img src={editId.data.image} alt="" srcSet="" />
                                 }
                             </div>
                         </div>

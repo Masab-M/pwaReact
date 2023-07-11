@@ -244,7 +244,7 @@ export default function DraftFeeds() {
                             <div className="ContentI">
                                 {
                                     editId !== null && editId.image &&
-                                    <img src={editId.image} alt="" srcset="" />
+                                    <img src={editId.image} alt="" srcSet="" />
                                 }
                             </div>
                         </div>
