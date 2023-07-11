@@ -17,7 +17,7 @@ export default function Feed() {
     const db = getFirestore(firebase);
     const [posts, setPosts] = useState([])
     const newPostRef = useRef(null)
-    const editPostRef=useRef(null)
+    const editPostRef = useRef(null)
     const [cameraType, setCameraType] = useState(true)
     const canvasRef = useRef(null)
     const videoRef = useRef(null)
@@ -122,7 +122,7 @@ export default function Feed() {
                         heading: p.heading,
                         content: p.content,
                         image: p.image,
-                        location:p.location
+                        location: p.location
                     }
                     console.log(newObj);
                     uploadFile(newObj)
@@ -142,10 +142,18 @@ export default function Feed() {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
             navigator.serviceWorker.ready
                 .then((registration) => {
-                    return registration.sync.register(tagName);
-                })
-                .then(() => {
-                    console.log('Sync registered',tagName);
+                    return registration.sync.getTags()
+                        .then((tags) => {
+                            if (tags.includes(tagName)) {
+                                console.log('Sync with tag', tagName, 'already registered');
+                                return Promise.resolve();
+                            } else {
+                                return registration.sync.register(tagName)
+                                    .then(() => {
+                                        console.log('Sync registered', tagName);
+                                    });
+                            }
+                        });
                 })
                 .catch((error) => {
                     console.log('Sync registration failed:', error);
@@ -347,14 +355,14 @@ export default function Feed() {
             image: obj.image,
             content: obj.content,
             heading: obj.heading,
-            location: location===""?obj.location:location,
+            location: location === "" ? obj.location : location,
             timestamp: Date.now()
         });
         const docRef = await addDoc(collection(db, "feed"), {
             image: obj.image,
             content: obj.content,
             heading: obj.heading,
-            location: location===""?obj.location:location,
+            location: location === "" ? obj.location : location,
             timestamp: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
