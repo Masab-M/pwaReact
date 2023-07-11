@@ -92,7 +92,7 @@
 .confirmbuttons {
     gap: 10px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .confirmbuttons button {
@@ -140,9 +140,10 @@
     font-size: 20px;
 }
 .cropButton{
-        display: flex;
+    display: flex;
     justify-content: flex-end;
     gap: 10px;
+    flex: 1;
 }
 
 .imageCrop {
@@ -175,13 +176,16 @@
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
+    gap: 30px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .ZoomRotate {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
+    flex: 1;
 }
 .insSpan {
     font-size: 12px;

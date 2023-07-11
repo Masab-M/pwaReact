@@ -8,6 +8,7 @@ import Home from './View/Home';
 import {BiHomeAlt2,BiCurrentLocation} from "react-icons/bi"
 import {CgFeed} from "react-icons/cg"
 import "./Assets/CSS/index.app.css"
+import DraftFeeds from './View/DraftFeeds';
 function App() {
   useEffect(() => {
     
@@ -36,6 +37,7 @@ function App() {
        <Routes>
         <Route path="/" element={ <Home/> } />
         <Route path="location" element={ <Location/> } />
+        <Route path="draft" element={ <DraftFeeds/> } />
         <Route path="feed" element={ <Feed/> } />
       </Routes>
       <div className="AppNav">

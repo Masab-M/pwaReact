@@ -717,6 +717,7 @@ export default function Feed() {
                     </div>
                 </div>
             </Modal>
+           
             <div className="addphoto">
                 <div className={`cameraSection ${cameraAccess ? "show" : "notshow"}`}>
                     <video ref={videoRef} autoPlay playsInline={true} >
