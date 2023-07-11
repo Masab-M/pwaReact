@@ -76,16 +76,14 @@ self.addEventListener("message", (event) => {
 // });
 self.addEventListener("sync", (event) => {
   if (event.tag === "feedRefresh") {
-    event.waitUntil(()=>{
-      console.log('called');  
-      sendFeedMessage("feedRefresh")
-    });
+    event.waitUntil(sendFeedMessage("feedRefresh"));
   }
 });
 function sendFeedMessage(tag) {
   self.clients.matchAll().then((clients) => {
     console.log(clients);
     clients.forEach((client) => {
+      console.log('called');
       client.postMessage({ tag: tag, message: "Sync event completed" });
     });
   });
