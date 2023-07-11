@@ -338,7 +338,6 @@ export default function Feed() {
         // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
         await uploadBytes(storageRef, (editPostModal) ? obj.data.image : obj.image).then((snapshot) => {
             getDownloadURL(snapshot.ref).then((downloadURL) => {
-                notifyMe("File Uploaded Successfully")
                 if (editPostModal && editId) {
                     obj.data.image = downloadURL
                     editPost(obj)
@@ -369,7 +368,7 @@ export default function Feed() {
         if (obj.indexid) {
             deleteIndexRow(obj.indexid).then((res) => {
                 setRefresh(true)
-                notifyMe("Feed Sync Successfully")
+                notifyMe("Your feed has been successfully synced.")
             })
         }
         else {
@@ -378,7 +377,7 @@ export default function Feed() {
             handleNewPostClose()
             setAddingPost(false)
             setNewPost({})
-            notifyMe("Feed Added Successfully")
+            notifyMe("Your feed has been added successfully.")
         }
     }
     async function editPost(obj) {
@@ -401,7 +400,7 @@ export default function Feed() {
                 setAddingPost(false)
                 setEditId(null)
                 setImageEdited(false)
-                notifyMe("Feed Edited Successfully")
+                notifyMe("You have successfully edited the feed.")
             })
             .catch(error => {
                 console.log(error);
@@ -434,6 +433,7 @@ export default function Feed() {
                     e.target.reset();
                     handleNewPostClose();
                     setNewPost({})
+                    notifyMe('Draft Feed will be uploaded once system is online.')
                     handleSyncClick("feedRefresh")
                 } catch (error) {
                     console.log(`Failed to add : ${error}`);
@@ -513,7 +513,7 @@ export default function Feed() {
     async function deletePost() {
         await deleteDoc(doc(db, "feed", deleteID)).then((res) => {
             console.log('deleted');
-            notifyMe("Feed Deleted Successfully")
+            notifyMe("Your feed has been successfully deleted.")
         })
         handlePostDeleteClose()
         setRefresh(!refresh)
