@@ -102,13 +102,9 @@ export default function Feed() {
                 if (event.data.tag === "feedRefresh") {
                     notifyMe("Back Online")
                     setPosts([])
+                    SyncData()
                     setRefresh(!refresh)
                     findLocation()
-                }
-                if (event.data.tag === "newPostSync") {
-                    notifyMe("Back Online")
-                    SyncData()
-                    console.log("get data");
                 }
             });
         }
@@ -141,19 +137,17 @@ export default function Feed() {
     const handleSyncClick = (tagName) => {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
             navigator.serviceWorker.ready
-                .then((registration) => {
-                    return registration.sync.getTags()
-                        .then((tags) => {
-                            if (tags.includes(tagName)) {
-                                console.log('Sync with tag', tagName, 'already registered');
-                                return Promise.resolve();
-                            } else {
-                                return registration.sync.register(tagName)
-                                    .then(() => {
-                                        console.log('Sync registered', tagName);
-                                    });
-                            }
-                        });
+                .then(async (registration) => {
+                    const tags = await registration.sync.getTags()
+                    if (tags.includes(tagName)) {
+                        console.log('Sync with tag', tagName, 'already registered')
+                        return Promise.resolve()
+                    } else {
+                        return registration.sync.register(tagName)
+                            .then(() => {
+                                console.log('Sync registered', tagName)
+                            })
+                    }
                 })
                 .catch((error) => {
                     console.log('Sync registration failed:', error);
@@ -434,7 +428,7 @@ export default function Feed() {
                     e.target.reset();
                     handleNewPostClose();
                     setNewPost({})
-                    handleSyncClick("newPostSync")
+                    handleSyncClick("feedRefresh")
                 } catch (error) {
                     console.log(`Failed to add : ${error}`);
                 }

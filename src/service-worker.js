@@ -69,11 +69,11 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
 });
-self.addEventListener("sync", (event) => {
-  if (event.tag === "newPostSync") {
-    event.waitUntil(sendPostMessage("newPostSync"));
-  }
-});
+// self.addEventListener("sync", (event) => {
+//   if (event.tag === "newPostSync") {
+//     event.waitUntil(sendPostMessage("newPostSync"));
+//   }
+// });
 self.addEventListener("sync", (event) => {
   if (event.tag === "feedRefresh") {
     event.waitUntil(sendFeedMessage("feedRefresh"));
@@ -87,11 +87,11 @@ function sendFeedMessage(tag) {
     });
   });
 }
-function sendPostMessage(tag) {
-  self.clients.matchAll().then((clients) => {
-    console.log(clients);
-    clients.forEach((client) => {
-      client.postMessage({ tag: tag, message: "Sync event completed" });
-    });
-  });
-}
+// function sendPostMessage(tag) {
+//   self.clients.matchAll().then((clients) => {
+//     console.log(clients);
+//     clients.forEach((client) => {
+//       client.postMessage({ tag: tag, message: "Sync event completed" });
+//     });
+//   });
+// }
