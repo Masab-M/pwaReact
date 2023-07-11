@@ -95,21 +95,26 @@ export default function Feed() {
     }, [refresh])
     useEffect(() => {
         if ('serviceWorker' in navigator) {
-            const handleMessage = event => {
-            
-              console.log('Received message from service worker:', event.data);
-              if (event.data.tag === "feedRefresh") {
-                notifyMe("Back Online");
-                setPosts([]);
-                SyncData();
-                setRefresh(!refresh);
-                findLocation();
-              }
-              navigator.serviceWorker.removeEventListener('message', handleMessage);
-            };
-            navigator.serviceWorker.addEventListener('message', handleMessage);
-          }
-    }, []);
+          const handleMessage = event => {
+            console.log('Received message from service worker:', event.data);
+            if (event.data.tag === "feedRefresh") {
+              notifyMe("Back Online");
+              setPosts([]);
+              SyncData();
+              setRefresh(!refresh);
+              findLocation();
+            }
+          };
+      
+          navigator.serviceWorker.addEventListener('message', handleMessage);
+      
+          // Cleanup: Remove the event listener when the component is unmounted
+          return () => {
+            navigator.serviceWorker.removeEventListener('message', handleMessage);
+          };
+        }
+      }, []);
+      
     async function SyncData() {
         getIndexDBData().then((res) => {
             if (res.length > 0) {
