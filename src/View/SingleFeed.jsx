@@ -20,10 +20,7 @@ export default function SingleFeed({data,id,showModal,setdeleteID,setupdateId,sh
             <div className="postContent">
                 <h4>{data.heading}</h4>
                 <p>{data.content}</p>
-                {
-                    data.timestamp &&
-                    <span>{timeConverter(data.timestamp)}</span>
-                }
+               
             </div>
             <div className="udActions">
                 <div className="Update">
@@ -47,6 +44,10 @@ export default function SingleFeed({data,id,showModal,setdeleteID,setupdateId,sh
             <img src={data.image} alt="" />
         </div>
         <div className="Location">
+        {
+                    data.timestamp &&
+                    <span>{timeConverter(data.timestamp)}</span>
+                }
             <span>{data.location}</span>
         </div>
     </div>

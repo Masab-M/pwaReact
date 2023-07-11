@@ -30,9 +30,22 @@
   }
 .postContent p {
     margin: 0;
+    font-family: 'Nunito Sans';
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
+    margin-bottom: 10px;
   }
+  .Location {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.Location span {
+    font-family: 'Nunito Sans';
+    font-size: 11px;
+    font-weight: 500;
+}
 .newPostContent textarea {
     max-width: 98%;
     min-width: 98%;
@@ -45,8 +58,9 @@
   }
   .postButton button {
     text-transform: uppercase;
-    font-weight: 800;
+    font-weight: 500;
     cursor: pointer;
+    font-family: 'Nunito Sans';
     padding: 10px 20px;
     border: none;
     background-color: #7C74ED;
@@ -84,8 +98,9 @@
 }
 
 .deleteModal .Instructions p {
+    font-family: 'Nunito Sans';
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 500;
     margin-bottom: 10px;
 }
 
@@ -98,6 +113,7 @@
 .confirmbuttons button {
     border: none;
     border-radius: 10px;
+    font-family: 'Nunito Sans';
     color: #fff;
     cursor: pointer;
     padding: 10px 30px;
@@ -135,6 +151,8 @@
     background: red;
 }
 .postContent h4 {
+    font-weight: 900;
+    font-family: 'Nunito Sans';
     margin: 0;
     margin-bottom: 5px;
     font-size: 20px;

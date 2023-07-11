@@ -107,8 +107,6 @@ export default function Feed() {
           };
       
           navigator.serviceWorker.addEventListener('message', handleMessage);
-      
-          // Cleanup: Remove the event listener when the component is unmounted
           return () => {
             navigator.serviceWorker.removeEventListener('message', handleMessage);
           };
