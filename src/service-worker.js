@@ -70,11 +70,13 @@ self.addEventListener("message", (event) => {
   }
 });
 self.addEventListener("sync", (event) => {
-  if (event.tag === "feedRefresh") {
-    event.waitUntil(sendFeedMessage("feedRefresh"));
-  }
   if (event.tag === "newPostSync") {
     event.waitUntil(sendFeedMessage("newPostSync"));
+  }
+});
+self.addEventListener("sync", (event) => {
+  if (event.tag === "feedRefresh") {
+    event.waitUntil(sendFeedMessage("feedRefresh"));
   }
 });
 function sendFeedMessage(tag) {
