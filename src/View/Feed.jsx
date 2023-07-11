@@ -76,15 +76,15 @@ export default function Feed() {
 
     useEffect(() => {
         findLocation()
-
         function handleResize() {
             setWindowDimensions(getWindowDimensions());
         }
-
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
     useEffect(() => {
+        // syncEdit();
+
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
@@ -101,6 +101,8 @@ export default function Feed() {
               notifyMe("Back Online");
               setPosts([]);
               SyncData();
+              syncDelete();
+            //   syncEdit();
               setRefresh(!refresh);
               findLocation();
             }
@@ -112,7 +114,39 @@ export default function Feed() {
           };
         }
       }, []);
-      
+      async function syncEdit() {
+        getIndexDBEditData().then((res) => {
+            if (res.length > 0) {
+                res.forEach((p) => {
+                    console.log(res);
+                    let newObj = {
+                        id:p.postId,
+                        data:{
+                            indexid: p.id,
+                            heading: p.heading,
+                            content: p.content,
+                            image: p.image,
+                        }
+                    }
+                    setEditId(newObj)
+                    console.log(newObj);
+                    uploadFile(newObj)
+                })
+            }
+        })
+    }
+    async function syncDelete() {
+        getIndexDBDeleteData().then((res) => {
+            if (res.length > 0) {
+                res.forEach((p) => {
+                    console.log(res);
+                    deletePost(p.postId).then(()=>{
+                        deleteIndexDeleteKey(p.id)
+                    })
+                })
+            }
+        })
+    }
     async function SyncData() {
         getIndexDBData().then((res) => {
             if (res.length > 0) {
@@ -134,8 +168,19 @@ export default function Feed() {
     async function deleteIndexRow(id) {
         await indexDB.posts.delete(id)
     }
+    async function deleteIndexDeleteKey(id) {
+        await indexDB.deletePosts.delete(id)
+    }
     async function getIndexDBData() {
         const posts = await indexDB.posts.toArray();
+        return posts;
+    }
+    async function getIndexDBDeleteData() {
+        const posts = await indexDB.deletePosts.toArray();
+        return posts;
+    }
+    async function getIndexDBEditData() {
+        const posts = await indexDB.editPosts.toArray();
         return posts;
     }
     const handleSyncClick = (tagName) => {
@@ -336,7 +381,7 @@ export default function Feed() {
         // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
         await uploadBytes(storageRef, (editPostModal) ? obj.data.image : obj.image).then((snapshot) => {
             getDownloadURL(snapshot.ref).then((downloadURL) => {
-                if (editPostModal && editId) {
+                if (editPostModal || editId) {
                     obj.data.image = downloadURL
                     editPost(obj)
                 }
@@ -496,25 +541,47 @@ export default function Feed() {
             newObj.data.content = e.target[1].value;
             newObj.data.image = blob;
             setEditId(newObj)
-            if (!imageEdited) {
-                editPost(newObj)
+            if(!navigator.onLine){
+                await indexDB.editPosts.add({
+                    postId: editId.id,
+                    heading:e.target[0].value,
+                    content:e.target[1].value,
+                    image:blob
+                })
+                handleEditClose();
+                notifyMe("Feed will be edited once system gets online")
             }
-            else {
-                uploadFile(newObj)
+            else{
+                if (!imageEdited) {
+                    editPost(newObj)
+                }
+                else {
+                    uploadFile(newObj)
+                }
+                setAddingPost(true)
             }
-            setAddingPost(true)
         }
         else {
             setFormErr(true)
         }
     }
-    async function deletePost() {
-        await deleteDoc(doc(db, "feed", deleteID)).then((res) => {
-            console.log('deleted');
-            notifyMe("Your feed has been successfully deleted.")
-        })
-        handlePostDeleteClose()
-        setRefresh(!refresh)
+    async function deletePost(id) {
+        if(!navigator.onLine)
+        {
+            await indexDB.deletePosts.add({
+                postId: deleteID,
+            })
+            handlePostDeleteClose()
+            notifyMe('Feed will be Deleted once system is online.')
+        }
+        else{
+            await deleteDoc(doc(db, "feed", id)).then((res) => {
+                console.log('deleted');
+                notifyMe("Your feed has been successfully deleted.")
+            })
+            handlePostDeleteClose()
+            setRefresh(!refresh)
+        }
     }
     const handleNewPostClose = () => {
         setNewPostModal(false);
@@ -711,7 +778,9 @@ export default function Feed() {
                     </div>
                     <div className="confirmbuttons">
                         <button onClick={handlePostDeleteClose}>Cancel</button>
-                        <button onClick={deletePost}>Delete</button>
+                        <button onClick={()=>{
+                            deletePost(deleteID)
+                        }}>Delete</button>
                     </div>
                 </div>
             </Modal>
