@@ -101,7 +101,6 @@ export default function Feed() {
               notifyMe("Back Online");
               setPosts([]);
               SyncData();
-              setRefresh(!refresh);
               findLocation();
             }
           };
@@ -129,6 +128,8 @@ export default function Feed() {
                     console.log(newObj);
                     uploadFile(newObj)
                 })
+            }else{
+                setRefresh(!refresh)
             }
         })
     }
