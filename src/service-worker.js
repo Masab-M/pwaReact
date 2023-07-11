@@ -71,7 +71,7 @@ self.addEventListener("message", (event) => {
 });
 self.addEventListener("sync", (event) => {
   if (event.tag === "newPostSync") {
-    event.waitUntil(sendFeedMessage("newPostSync"));
+    event.waitUntil(sendPostMessage("newPostSync"));
   }
 });
 self.addEventListener("sync", (event) => {
@@ -81,6 +81,15 @@ self.addEventListener("sync", (event) => {
 });
 function sendFeedMessage(tag) {
   self.clients.matchAll().then((clients) => {
+    console.log(clients);
+    clients.forEach((client) => {
+      client.postMessage({ tag: tag, message: "Sync event completed" });
+    });
+  });
+}
+function sendPostMessage(tag) {
+  self.clients.matchAll().then((clients) => {
+    console.log(clients);
     clients.forEach((client) => {
       client.postMessage({ tag: tag, message: "Sync event completed" });
     });
