@@ -75,24 +75,7 @@ export default function Feed() {
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
 
     useEffect(() => {
-        // if ('serviceWorker' in navigator && 'SyncManager' in window) {
-        //     console.log('if');
-        //     navigator.serviceWorker.ready.then(function(reg) {
-        //       return reg.sync.register('feed');
-        //     }).catch(function() {
-        //       // system was unable to register for a sync,
-        //       // this could be an OS-level restriction
-        //         console.log('supported');
-
-        //     //   postDataFromThePage();
-        //     });
-        //   } else {
-        //     // serviceworker/sync not supported
-        //     console.log('not supported');
-        //     // postDataFromThePage();
-        //   }
         findLocation()
-        // displayNotification()
 
         function handleResize() {
             setWindowDimensions(getWindowDimensions());
@@ -134,7 +117,6 @@ export default function Feed() {
         getIndexDBData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
-                    setNewPost(null);
                     let newObj = {
                         indexid: p.id,
                         heading: p.heading,
@@ -143,9 +125,6 @@ export default function Feed() {
                         location:p.location
                     }
                     console.log(newObj);
-                    setNewPost({
-                        ...newObj
-                    })
                     uploadFile(newObj)
                 })
             }
@@ -157,24 +136,8 @@ export default function Feed() {
     }
     async function getIndexDBData() {
         const posts = await indexDB.posts.toArray();
-        // Return result
         return posts;
     }
-    // useEffect(() => {
-    //     const channel = new BroadcastChannel('syncChannel');
-    //     channel.onmessage = (event) => {
-    //       if (event.data.type === 'feedonline') {
-    //         setRefresh(!refresh)
-    //         console.log('====================================');
-    //         console.log('refresh');
-    //         console.log('====================================');
-    //       }
-    //     };
-
-    //     return () => {
-    //       channel.close();
-    //     };
-    //   }, []);
     const handleSyncClick = (tagName) => {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
             navigator.serviceWorker.ready
@@ -182,7 +145,7 @@ export default function Feed() {
                     return registration.sync.register(tagName);
                 })
                 .then(() => {
-                    console.log('Sync registered');
+                    console.log('Sync registered',tagName);
                 })
                 .catch((error) => {
                     console.log('Sync registration failed:', error);
@@ -208,12 +171,6 @@ export default function Feed() {
             openCamera()
         }
     }, [cameraType])
-    async function displayNotification() {
-        if (Notification.permission === 'granted') {
-            const reg = await navigator.serviceWorker.getRegistration();
-            reg.showNotification("Go go");
-        }
-    }
     function findLocation() {
         navigator.geolocation.getCurrentPosition(position => {
             fetch(
@@ -302,12 +259,6 @@ export default function Feed() {
                 video: {
                     width: windowDimensions.width, height: windowDimensions.height,
                     facingMode: cameraType ? "user" : "environment"
-                    // mandatory: { minAspectRatio: 1.333, maxAspectRatio: 1.334},
-                    // optional: [
-                    //   { minFrameRate: 60 },
-                    //   { maxWidth: 640 },
-                    //   { maxHeigth: 480 }
-                    // ]
                 }
             })
             setCameraAccess(true)
@@ -346,7 +297,6 @@ export default function Feed() {
     function takeImage() {
         canvasRef.current.width = videoRef.current.videoWidth
         canvasRef.current.height = videoRef.current.videoHeight
-
         canvasRef.current.getContext('2d').drawImage(
             videoRef.current,
             0, 0,
@@ -379,11 +329,8 @@ export default function Feed() {
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
         // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
         await uploadBytes(storageRef, (editPostModal) ? obj.data.image : obj.image).then((snapshot) => {
-            console.log('Uploaded a blob or file!', snapshot);
             getDownloadURL(snapshot.ref).then((downloadURL) => {
-                console.log('File available at', downloadURL);
                 notifyMe("File Uploaded Successfully")
-
                 if (editPostModal && editId) {
                     obj.data.image = downloadURL
                     editPost(obj)
@@ -407,16 +354,14 @@ export default function Feed() {
             image: obj.image,
             content: obj.content,
             heading: obj.heading,
-            location: location,
+            location: location===""?obj.location:location,
             timestamp: Date.now()
         });
         console.log("Document written with ID: ", docRef.id);
         if (obj.indexid) {
             deleteIndexRow(obj.indexid).then((res) => {
                 setRefresh(!refresh)
-                setNewPost({})
-                newPostRef.current.reset();
-                notifyMe("Feed Added Successfully")
+                notifyMe("Feed Sync Successfully")
             })
         }
         else {

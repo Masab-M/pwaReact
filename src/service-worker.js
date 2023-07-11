@@ -7,11 +7,11 @@
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
 
-import { clientsClaim } from 'workbox-core';
-import { ExpirationPlugin } from 'workbox-expiration';
-import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { clientsClaim } from "workbox-core";
+import { ExpirationPlugin } from "workbox-expiration";
+import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import { StaleWhileRevalidate } from "workbox-strategies";
 
 clientsClaim();
 
@@ -24,16 +24,16 @@ precacheAndRoute(self.__WB_MANIFEST);
 // Set up App Shell-style routing, so that all navigation requests
 // are fulfilled with your index.html shell. Learn more at
 // https://developers.google.com/web/fundamentals/architecture/app-shell
-const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
+const fileExtensionRegexp = new RegExp("/[^/?]+\\.[^/]+$");
 registerRoute(
   // Return false to exempt requests from being fulfilled by index.html.
   ({ request, url }) => {
     // If this isn't a navigation, skip.
-    if (request.mode !== 'navigate') {
+    if (request.mode !== "navigate") {
       return false;
     } // If this is a URL that starts with /_, skip.
 
-    if (url.pathname.startsWith('/_')) {
+    if (url.pathname.startsWith("/_")) {
       return false;
     } // If this looks like a URL for a resource, because it contains // a file extension, skip.
 
@@ -43,16 +43,17 @@ registerRoute(
 
     return true;
   },
-  createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')
+  createHandlerBoundToURL(process.env.PUBLIC_URL + "/index.html")
 );
 
 // An example runtime caching route for requests that aren't handled by the
 // precache, in this case same-origin .png requests like those from in public/
 registerRoute(
   // Add in any other file extensions or routing criteria as needed.
-  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.png'), // Customize this strategy as needed, e.g., by changing to CacheFirst.
+  ({ url }) =>
+    url.origin === self.location.origin && url.pathname.endsWith(".png"), // Customize this strategy as needed, e.g., by changing to CacheFirst.
   new StaleWhileRevalidate({
-    cacheName: 'images',
+    cacheName: "images",
     plugins: [
       // Ensure that once this runtime cache reaches a maximum size the
       // least-recently used images are removed.
@@ -63,15 +64,12 @@ registerRoute(
 
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 self.addEventListener("sync", (event) => {
-  console.log('====================================');
-  console.log('sync');
-  console.log('====================================');
   if (event.tag === "feedRefresh") {
     event.waitUntil(sendFeedMessage("feedRefresh"));
   }
@@ -79,94 +77,10 @@ self.addEventListener("sync", (event) => {
     event.waitUntil(sendFeedMessage("newPostSync"));
   }
 });
-self.addEventListener("sync", (event) => {
-  if (event.tag === "sync-messages") {
-    event.waitUntil(sendOutboxMessages("sync-messages"));
-  }
-});
-function sendNewPostMessage(tag){
-  console.log('Success Sync Post ',tag)
-self.clients.matchAll().then(clients => {
-  console.log('====================================');
-  console.log("match");
-  console.log('====================================');
-        clients.forEach(client => {
-          console.log('====================================');
-          console.log('post');
-          console.log('====================================');
-          client.postMessage({ tag: tag, message: 'Sync event completed' });
-          console.log('====================================');
-          console.log('post send');
-          console.log('====================================');
-        });
-      });
+function sendFeedMessage(tag) {
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ tag: tag, message: "Sync event completed" });
+    });
+  });
 }
-function sendFeedMessage(tag){
-  console.log('Success Sync Feed ',tag)
-  
-self.clients.matchAll().then(clients => {
-  console.log('====================================');
-  console.log("match");
-  console.log('====================================');
-        clients.forEach(client => {
-          console.log('====================================');
-          console.log('post');
-          console.log('====================================');
-          client.postMessage({ tag: tag, message: 'Sync event completed' });
-          console.log('====================================');
-          console.log('post send');
-          console.log('====================================');
-        });
-      });
-}
-function sendOutboxMessages(tag) {
-  // Implement your logic to send outbox messages here
-  console.log('Success Sync ',tag)
-}
-// self.addEventListener('sync', event => {
-//   if (event.tag === 'feedRefresh') {
-//       event.waitUntil(()=>{
-//         alert('online')
-//       });
-//   }
-// });
-// Any other custom service worker logic can go here.
-// src/service-worker.js
-// const CACHE_NAME = 'my-cache';
-
-// self.addEventListener('fetch', event => {
-//   console.log('fetch');
-//   event.respondWith(
-//     (async () => {
-//       try {
-//         // Handle Firebase requests
-//         console.log('try');
-//         if (event.request.url.startsWith('https://firestore.googleapis.com/v1/projects/social-feed-6e918/databases')) {
-//           const cache = await caches.open(CACHE_NAME);
-//           const cacheResponse = await cache.match('firebase-data');
-//           if (cacheResponse) {
-//           console.log('Cache Found');
-
-//             return cacheResponse;
-//           } else {
-//             const response = await fetch(event.request);
-//             await cache.put('firebase-data', response.clone());
-//             return response;
-//           }
-//         }
-
-//         // Handle other requests
-//         // const response = await fetch(event.request);
-//         // const cache = await caches.open(CACHE_NAME);
-//         // await cache.put(event.request, response.clone());
-//         // return response;
-//       } catch (error) {
-//         console.log('====================================');
-//         console.log('eventMatch catch');
-//         console.log('====================================');
-//         const cacheResponse = await caches.match(event.request);
-//         return cacheResponse;
-//       }
-//     })()
-//   );
-// });
