@@ -88,7 +88,6 @@ export default function Feed() {
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
-
         }).catch(async (err) => {
             handleSyncClick("feedRefresh")
             getFeedCache()

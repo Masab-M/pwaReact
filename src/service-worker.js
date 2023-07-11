@@ -76,7 +76,10 @@ self.addEventListener("message", (event) => {
 // });
 self.addEventListener("sync", (event) => {
   if (event.tag === "feedRefresh") {
-    event.waitUntil(sendFeedMessage("feedRefresh"));
+    event.waitUntil(()=>{
+      console.log('called');  
+      sendFeedMessage("feedRefresh")
+    });
   }
 });
 function sendFeedMessage(tag) {
