@@ -82,12 +82,12 @@ export default function Feed() {
                 setDraftPost(res)
                 console.log(res);
             }
-            else{
+            else {
                 setDraftPost([])
             }
         })
         getFeeds().then((data) => {
-            console.log('data',data);
+            console.log('data', data);
             setPosts(data)
         }).catch(async (err) => {
             handleSyncClick("feedRefresh")
@@ -101,35 +101,35 @@ export default function Feed() {
         }
         window.addEventListener('resize', handleResize);
         if ('serviceWorker' in navigator) {
-          const handleMessage = event => {
-            console.log('Received message from service worker:', event.data);
-            if (event.data.tag === "feedRefresh") {
-              notifyMe("Back Online");
-              setPosts([]);
-              SyncData();
-              syncDelete();
-              syncEdit();
-              setRefresh(!refresh);
-              findLocation();
-            }
-          };
-      
-          navigator.serviceWorker.addEventListener('message', handleMessage);
-          return () => {
-            navigator.serviceWorker.removeEventListener('message', handleMessage);
-            window.removeEventListener('resize', handleResize);
-          };
+            const handleMessage = event => {
+                console.log('Received message from service worker:', event.data);
+                if (event.data.tag === "feedRefresh") {
+                    notifyMe("Back Online");
+                    setPosts([]);
+                    SyncData();
+                    syncDelete();
+                    syncEdit();
+                    setRefresh(!refresh);
+                    findLocation();
+                }
+            };
+
+            navigator.serviceWorker.addEventListener('message', handleMessage);
+            return () => {
+                navigator.serviceWorker.removeEventListener('message', handleMessage);
+                window.removeEventListener('resize', handleResize);
+            };
         }
-      }, []);
-      async function syncEdit() {
+    }, []);
+    async function syncEdit() {
         getIndexDBEditData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
                     console.log(res);
                     let newObj = {
-                        id:p.postId,
+                        id: p.postId,
                         indexid: p.id,
-                        data:{
+                        data: {
                             heading: p.heading,
                             content: p.content,
                             image: p.image,
@@ -140,8 +140,8 @@ export default function Feed() {
                     if (!(newObj.data.image instanceof Blob)) {
                         editPost(newObj)
                     }
-                    else{
-                        uploadFile(newObj,"edit")
+                    else {
+                        uploadFile(newObj, "edit")
                     }
                 })
             }
@@ -152,7 +152,7 @@ export default function Feed() {
             if (res.length > 0) {
                 res.forEach((p) => {
                     console.log(res);
-                    deletePost(p.postId).then(()=>{
+                    deletePost(p.postId).then(() => {
                         deleteIndexDeleteKey(p.id)
                         setRefresh(!refresh)
                     })
@@ -172,7 +172,7 @@ export default function Feed() {
                         location: p.location
                     }
                     console.log(newObj);
-                    uploadFile(newObj,"new")
+                    uploadFile(newObj, "new")
                 })
             }
         })
@@ -390,17 +390,17 @@ export default function Feed() {
         handleImageEditShow()
     }
 
-    async function uploadFile(obj,form) {
+    async function uploadFile(obj, form) {
         const storage = getStorage();
         const storageRef = ref(storage, `images/${Date.now()}.jpg`);
         // let blob = await fetch((editPostModal && editId) ? editId.data.image : newPost.image).then(r => r.blob());
-        await uploadBytes(storageRef, form==="edit" ? obj.data.image : obj.image).then((snapshot) => {
+        await uploadBytes(storageRef, form === "edit" ? obj.data.image : obj.image).then((snapshot) => {
             getDownloadURL(snapshot.ref).then((downloadURL) => {
-                if (form==="edit") {
+                if (form === "edit") {
                     obj.data.image = downloadURL
                     editPost(obj)
                 }
-                else if(form==="new") {
+                else if (form === "new") {
                     obj.image = downloadURL;
                     addPost(obj)
                 }
@@ -439,7 +439,7 @@ export default function Feed() {
         }
     }
     async function editPost(obj) {
-        const docRef = doc(db, "feed", editId?editId.id:obj.id);
+        const docRef = doc(db, "feed", editId ? editId.id : obj.id);
         console.log({
             image: obj.data.image,
             content: obj.data.content,
@@ -459,7 +459,7 @@ export default function Feed() {
                         notifyMe("Your feed has been successfully synced.")
                     })
                 }
-                else{
+                else {
                     setRefresh(!refresh)
                     handleEditClose();
                     setAddingPost(false)
@@ -507,7 +507,7 @@ export default function Feed() {
                 }
             }
             else {
-                uploadFile(newObj,"new")
+                uploadFile(newObj, "new")
                 setAddingPost(true)
             }
         }
@@ -556,6 +556,16 @@ export default function Feed() {
             });
         }
     }
+    function blobToDataURL(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
     async function handleEditForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.data.image) {
@@ -565,52 +575,77 @@ export default function Feed() {
             newObj.data.heading = e.target[0].value;
             newObj.data.content = e.target[1].value;
             newObj.data.image = blob;
+            console.log({
+                postId: editId.id,
+                heading: e.target[0].value,
+                content: e.target[1].value,
+                image: blob
+            });
             setEditId(newObj)
-            if(!navigator.onLine){
+            if (!navigator.onLine) {
                 const editDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(editId.id).toArray();
-                console.log('edit',editDB);
-                if(editDB.length>0)
-                {
+                console.log('edit', editDB);
+                if (editDB.length > 0) {
                     await indexDB.editPosts.update(editDB[0].id, {
-                        heading:e.target[0].value,
-                        content:e.target[1].value,
-                        image:blob
+                        heading: e.target[0].value,
+                        content: e.target[1].value,
+                        image: blob
                     })
                 }
-                else{
+                else {
                     await indexDB.editPosts.add({
                         postId: editId.id,
-                        heading:e.target[0].value,
-                        content:e.target[1].value,
-                        image:blob
+                        heading: e.target[0].value,
+                        content: e.target[1].value,
+                        image: blob
                     })
                 }
                 const updatedItems = [...posts];
-                const index = updatedItems.findIndex(item => item.id ===  editId.id); 
-            
+                const index = updatedItems.findIndex(item => item.id === editId.id);
                 if (index !== -1) {
-                  const updatedItem = { ...updatedItems[index],  
-                   data:{
-                    heading:e.target[0].value,
-                    content:e.target[1].value,
-                   }
-                }; // Create a new object with the updated properties
-                console.log(updatedItem,'item');
-                  updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
-                  setPosts(updatedItems); 
-                  const cache = await caches.open("my-cache");
-                  await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));
+                    let data = {}
+                    console.log(blob);
+                    if (blob instanceof Blob) {
+                       await blobToDataURL(blob)
+                            .then((dataURL) => {
+                                console.log(dataURL);
+                                data = {
+                                    heading: e.target[0].value,
+                                    content: e.target[1].value,
+                                    image:dataURL
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                            });
+                        
+                    }
+                    else {
+                        data = {
+                            heading: e.target[0].value,
+                            content: e.target[1].value,
+                        }
+                    }
+                    const updatedItem = {
+                        ...updatedItems[index],
+                        data: data
+                    }; // Create a new object with the updated properties
+                    console.log(updatedItem, 'item');
+                    updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
+                    setPosts(updatedItems);
+                    const cache = await caches.open("my-cache");
+                    await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));
                 }
                 handleEditClose();
                 notifyMe("Feed will be edited once system gets online")
                 handleSyncClick("feedRefresh")
             }
-            else{
+            else {
                 if (!imageEdited) {
                     editPost(newObj)
                 }
                 else {
-                    uploadFile(newObj,"edit")
+                    uploadFile(newObj, "edit")
                 }
                 setAddingPost(true)
             }
@@ -620,31 +655,29 @@ export default function Feed() {
         }
     }
     async function deletePost(id) {
-        if(!navigator.onLine)
-        {
+        if (!navigator.onLine) {
             const deleteDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(deleteID).toArray();
-            console.log('delete',deleteDB);
-            if(deleteDB.length>0)
-                {
-                    await indexDB.deletePosts.update(deleteDB[0].id, {
-                        postId: deleteID,
-                    })
-                }
-                else{
-                    await indexDB.deletePosts.add({
-                        postId: deleteID,
-                    })
-                }
-                let filteredArray = posts.filter(item => item.id !== deleteID)
-                console.log('filter',filteredArray);
-                setPosts(filteredArray);
-                const cache = await caches.open("my-cache");
-                await cache.put('firebase-data', new Response(JSON.stringify(filteredArray)));
+            console.log('delete', deleteDB);
+            if (deleteDB.length > 0) {
+                await indexDB.deletePosts.update(deleteDB[0].id, {
+                    postId: deleteID,
+                })
+            }
+            else {
+                await indexDB.deletePosts.add({
+                    postId: deleteID,
+                })
+            }
+            let filteredArray = posts.filter(item => item.id !== deleteID)
+            console.log('filter', filteredArray);
+            setPosts(filteredArray);
+            const cache = await caches.open("my-cache");
+            await cache.put('firebase-data', new Response(JSON.stringify(filteredArray)));
             handlePostDeleteClose()
             notifyMe('Feed will be Deleted once system is online.')
             handleSyncClick("feedRefresh")
         }
-        else{
+        else {
             await deleteDoc(doc(db, "feed", id)).then((res) => {
                 console.log('deleted');
                 notifyMe("Your feed has been successfully deleted.")
@@ -681,11 +714,6 @@ export default function Feed() {
         setEditPostModal(true);
     };
     console.log(editId);
-    function blobToDataURL(blob, callback) {
-    var a = new FileReader();
-    a.onload = function(e) {callback(e.target.result);}
-    a.readAsDataURL(blob);
-}
     return (
         <>
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
@@ -757,7 +785,7 @@ export default function Feed() {
                                 {
                                     editId !== null && editId.data.image &&
                                     <>
-                                    <img src={(editId.data.image instanceof Blob)?URL.createObjectURL(editId.data.image):editId.data.image} alt="" srcSet="" />
+                                        <img src={(editId.data.image instanceof Blob) ? URL.createObjectURL(editId.data.image) : editId.data.image} alt="" srcSet="" />
                                     </>
                                 }
                             </div>
@@ -856,13 +884,13 @@ export default function Feed() {
                     </div>
                     <div className="confirmbuttons">
                         <button onClick={handlePostDeleteClose}>Cancel</button>
-                        <button onClick={()=>{
+                        <button onClick={() => {
                             deletePost(deleteID)
                         }}>Delete</button>
                     </div>
                 </div>
             </Modal>
-           
+
             <div className="addphoto">
                 <div className={`cameraSection ${cameraAccess ? "show" : "notshow"}`}>
                     <video ref={videoRef} autoPlay playsInline={true} >
@@ -910,15 +938,15 @@ export default function Feed() {
                 </div>
             </div>
             <div className="feedlist">
-            {
-                draftPost ?
-                    draftPost.length > 0 ?
-                        draftPost.map((p, i) =>
-                            <SingleDraftFeed key={i} data={p} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow}/>
-                        )
-                        :''
-                    :''
-            }
+                {
+                    draftPost ?
+                        draftPost.length > 0 ?
+                            draftPost.slice(0).reverse().map((p, i) =>
+                                <SingleDraftFeed key={i} data={p} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} />
+                            )
+                            : ''
+                        : ''
+                }
                 {
                     posts ?
                         posts.length > 0 ?
