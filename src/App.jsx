@@ -1,18 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
+import { NavLink, Route, Routes } from 'react-router-dom';
+
 import './App.css';
-import { Link, NavLink, Route, Routes } from 'react-router-dom';
-import Feed from './View/Feed';
-import Location from './View/Location';
+import "./Assets/CSS/index.app.css"
 import Logo from "./Assets/Images/Progressive_Web_Apps_Logo.svg.png"
-import Home from './View/Home';
+
 import {BiHomeAlt2,BiCurrentLocation} from "react-icons/bi"
 import {CgFeed} from "react-icons/cg"
-import "./Assets/CSS/index.app.css"
-import DraftFeeds from './View/DraftFeeds';
+
+const Location =lazy(()=> import('./View/Location'));
+const Home =lazy(()=> import('./View/Home')) ;
+const DraftFeeds = lazy(()=> import('./View/DraftFeeds'));
+const Feed = lazy(()=> import('./View/Feed'));
+
 function App() {
-  useEffect(() => {
-    
-  }, [])
   
   return (
     <div className="App">
@@ -34,12 +35,18 @@ function App() {
           </ul>
         </div>
       </nav>
+      <Suspense fallback={
+        <>
+        <div class="spinner"></div>
+        </>
+      }>
        <Routes>
         <Route path="/" element={ <Home/> } />
         <Route path="location" element={ <Location/> } />
         <Route path="draft" element={ <DraftFeeds/> } />
         <Route path="feed" element={ <Feed/> } />
       </Routes>
+      </Suspense>
       <div className="AppNav">
         <div className="AppMenus">
           <div className="Menulist">

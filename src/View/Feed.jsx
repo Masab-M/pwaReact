@@ -13,8 +13,10 @@ import Cropper from 'react-easy-crop'
 import getCroppedImg from '../Partials/Crop/GetCropImage'
 import { useLiveQuery } from "dexie-react-hooks";
 import { indexDB } from "../Utils/indexdb";
+import SingleDraftFeed from './SingleDraftFeed'
 export default function Feed() {
     const db = getFirestore(firebase);
+    const [draftPost, setDraftPost] = useState([])
     const [posts, setPosts] = useState([])
     const newPostRef = useRef(null)
     const editPostRef = useRef(null)
@@ -73,18 +75,17 @@ export default function Feed() {
         };
     }
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
-
-    useEffect(() => {
-        findLocation()
-        function handleResize() {
-            setWindowDimensions(getWindowDimensions());
-        }
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
     useEffect(() => {
         syncEdit();
-
+        getIndexDBData().then((res) => {
+            if (res.length > 0) {
+                setDraftPost(res)
+                console.log(res);
+            }
+            else{
+                setDraftPost([])
+            }
+        })
         getFeeds().then((data) => {
             console.log(data);
             setPosts(data)
@@ -94,6 +95,11 @@ export default function Feed() {
         })
     }, [refresh])
     useEffect(() => {
+        findLocation()
+        function handleResize() {
+            setWindowDimensions(getWindowDimensions());
+        }
+        window.addEventListener('resize', handleResize);
         if ('serviceWorker' in navigator) {
           const handleMessage = event => {
             console.log('Received message from service worker:', event.data);
@@ -111,6 +117,7 @@ export default function Feed() {
           navigator.serviceWorker.addEventListener('message', handleMessage);
           return () => {
             navigator.serviceWorker.removeEventListener('message', handleMessage);
+            window.removeEventListener('resize', handleResize);
           };
         }
       }, []);
@@ -493,6 +500,7 @@ export default function Feed() {
                     setNewPost({})
                     notifyMe('Draft Feed will be uploaded once system is online.')
                     handleSyncClick("feedRefresh")
+                    setRefresh(!refresh)
                 } catch (error) {
                     console.log(`Failed to add : ${error}`);
                 }
@@ -627,8 +635,14 @@ export default function Feed() {
     const handleEditShow = () => {
         setEditPostModal(true);
     };
+    console.log(editId);
+    function blobToDataURL(blob, callback) {
+    var a = new FileReader();
+    a.onload = function(e) {callback(e.target.result);}
+    a.readAsDataURL(blob);
+}
     return (
-        <div>
+        <>
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
                 <div className="newPostPopup">
                     <form ref={newPostRef} action="" onSubmit={handlePostForm}>
@@ -697,7 +711,9 @@ export default function Feed() {
                             <div className="ContentI">
                                 {
                                     editId !== null && editId.data.image &&
+                                    <>
                                     <img src={editId.data.image} alt="" srcSet="" />
+                                    </>
                                 }
                             </div>
                         </div>
@@ -849,6 +865,15 @@ export default function Feed() {
                 </div>
             </div>
             <div className="feedlist">
+            {
+                draftPost ?
+                    draftPost.length > 0 ?
+                        draftPost.map((p, i) =>
+                            <SingleDraftFeed key={i} data={p} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow}/>
+                        )
+                        :''
+                    :''
+            }
                 {
                     posts ?
                         posts.length > 0 ?
@@ -865,6 +890,6 @@ export default function Feed() {
                         </div>
                 }
             </div>
-        </div>
+        </>
     )
 }

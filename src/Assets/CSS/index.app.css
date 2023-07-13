@@ -1,4 +1,7 @@
 @media (min-width:320px)  { 
+  .feedlist{
+    margin-bottom: 70px;
+  }
   .AppNav{
   display: block;
   }
@@ -15,6 +18,9 @@
     }
     /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */ }
   @media (min-width:641px)  {
+    .feedlist{
+      margin-bottom: 10px;
+    }
     .AppNav{
       display: none;
       }
@@ -22,12 +28,12 @@
       display: block;
     }
     .locationDetails,.NewFeed, .feedlist,.tileMenu{
-      width: 60%;
+      width: 50%;
     }
     /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */ }
   @media (min-width:961px)  { 
     .locationDetails,.NewFeed, .feedlist,.tileMenu{
-      width: 50%;
+      width: 40%;
     }
     /* tablet, landscape iPad, lo-res laptops ands desktops */ }
   @media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */ }

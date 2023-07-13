@@ -67,7 +67,16 @@
     border-radius: 10px;
     color: #fff;
   }
-  
+  .draftedTag span {
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: 'Nunito Sans';
+    font-weight: 900;
+    display: block;
+    width: fit-content;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
   .postButton {
     text-align: right;
   }
@@ -282,3 +291,30 @@
     font-size: 20px;
     color: #fff;
 }
+.postImage .LazyPlaceHolder {
+    height: 60vh;
+    display: block;
+    border-radius: 20px;
+    width: 100%;
+    background: linear-gradient(to right, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%);
+    background-size: 800px 104px;
+    animation: skeleton 1.5s linear infinite;
+}
+@keyframes skeleton {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: 200px 0;
+    }
+  }
+
+  
+  .postImage img {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  
+  .postImage img.loaded {
+    opacity: 1;
+  }

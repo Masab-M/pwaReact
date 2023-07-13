@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react'
 import  {AiOutlineEdit,AiOutlineDelete} from "react-icons/ai"
 export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,showEditModal}) {
     const [Image, setImage] = useState('')
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
     function timeConverter(UNIX_timestamp) {
         var a = new Date(UNIX_timestamp);
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -23,7 +28,7 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
           reader.onabort = _e => reject(new Error("Read aborted"));
           reader.readAsDataURL(blob);
         });
-      }
+    }
       useEffect(() => {
         blobToDataURL(data.image).then((res)=>{
             setImage(res)
@@ -32,6 +37,9 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
 
   return (
     <div className='post'>
+            <div className="draftedTag">
+                <span>Draft</span>
+            </div>
         <div className="content">
             <div className="postContent">
                 <h4>{data.heading}</h4>
@@ -44,7 +52,10 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
             <div className="udActions">
                 <div className="Update">
                     <AiOutlineEdit onClick={()=>{
-                        setupdateId(data)
+                        setupdateId({
+                            id:data.id,
+                            data:data
+                        })
                         showEditModal()
                     }}/>
                 </div>
@@ -57,7 +68,8 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
             </div>
         </div>
         <div className="postImage">
-            <img src={Image} alt="" />
+        {imageLoaded && <div>Loading</div>}
+            <img src={Image} alt="" loading='lazy' onLoad={handleImageLoad} />
         </div>
         <div className="Location">
             <span>{data.location}</span>

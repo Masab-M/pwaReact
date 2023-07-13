@@ -1,6 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import  {AiOutlineEdit,AiOutlineDelete} from "react-icons/ai"
 export default function SingleFeed({data,id,showModal,setdeleteID,setupdateId,showEditModal}) {
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    const handleImageLoad = () => {
+      setImageLoaded(true);
+    };
     function timeConverter(UNIX_timestamp) {
         var a = new Date(UNIX_timestamp);
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -41,7 +46,8 @@ export default function SingleFeed({data,id,showModal,setdeleteID,setupdateId,sh
             </div>
         </div>
         <div className="postImage">
-            <img src={data.image} alt="" />
+        {!imageLoaded && <div className='LazyPlaceHolder'></div>}
+            <img src={data.image} alt="" className={imageLoaded ? 'loaded' : ''} loading='lazy' onLoad={handleImageLoad}/>
         </div>
         <div className="Location">
         {
