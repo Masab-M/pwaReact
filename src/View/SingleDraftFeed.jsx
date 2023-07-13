@@ -68,8 +68,8 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
             </div>
         </div>
         <div className="postImage">
-        {imageLoaded && <div>Loading</div>}
-            <img src={Image} alt="" loading='lazy' onLoad={handleImageLoad} />
+        {!imageLoaded &&  <div className='LazyPlaceHolder'></div>}
+            <img src={Image} alt="" className={imageLoaded ? 'loaded' : ''} loading='lazy' onLoad={handleImageLoad}/>
         </div>
         <div className="Location">
             <span>{data.location}</span>

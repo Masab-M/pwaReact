@@ -154,6 +154,7 @@ export default function Feed() {
                     console.log(res);
                     deletePost(p.postId).then(()=>{
                         deleteIndexDeleteKey(p.id)
+                        setRefresh(!refresh)
                     })
                 })
             }
