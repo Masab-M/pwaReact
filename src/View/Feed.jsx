@@ -585,6 +585,22 @@ export default function Feed() {
                         image:blob
                     })
                 }
+                const updatedItems = [...posts];
+                const index = updatedItems.findIndex(item => item.id ===  editId.id); 
+            
+                if (index !== -1) {
+                  const updatedItem = { ...updatedItems[index],  
+                   data:{
+                    heading:e.target[0].value,
+                    content:e.target[1].value,
+                   }
+                }; // Create a new object with the updated properties
+                console.log(updatedItem,'item');
+                  updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
+                  setPosts(updatedItems); 
+                  const cache = await caches.open("my-cache");
+                  await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));
+                }
                 handleEditClose();
                 notifyMe("Feed will be edited once system gets online")
                 handleSyncClick("feedRefresh")
