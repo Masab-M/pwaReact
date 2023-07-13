@@ -49,7 +49,7 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
                     <span>{timeConverter(data.timestamp)}</span>
                 }
             </div>
-            <div className="udActions">
+            {/* <div className="udActions">
                 <div className="Update">
                     <AiOutlineEdit onClick={()=>{
                         setupdateId({
@@ -65,7 +65,7 @@ export default function SingleDraftFeed({data,showModal,setdeleteID,setupdateId,
                         showModal()
                     }}/>
                 </div>
-            </div>
+            </div> */}
         </div>
         <div className="postImage">
         {!imageLoaded &&  <div className='LazyPlaceHolder'></div>}

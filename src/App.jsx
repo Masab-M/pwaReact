@@ -37,7 +37,7 @@ function App() {
       </nav>
       <Suspense fallback={
         <>
-        <div class="spinner"></div>
+        <div className="spinner"></div>
         </>
       }>
        <Routes>

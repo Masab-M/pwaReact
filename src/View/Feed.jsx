@@ -559,6 +559,7 @@ export default function Feed() {
     async function handleEditForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.data.image) {
+            console.log(editId.data.image);
             let blob = !imageEdited ? editId.data.image : await fetch(editId.data.image).then(r => r.blob());
             let newObj = editId;
             newObj.data.heading = e.target[0].value;
@@ -566,12 +567,24 @@ export default function Feed() {
             newObj.data.image = blob;
             setEditId(newObj)
             if(!navigator.onLine){
-                await indexDB.editPosts.add({
-                    postId: editId.id,
-                    heading:e.target[0].value,
-                    content:e.target[1].value,
-                    image:blob
-                })
+                const editDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(editId.id).toArray();
+                console.log('edit',editDB);
+                if(editDB.length>0)
+                {
+                    await indexDB.editPosts.update(editDB[0].id, {
+                        heading:e.target[0].value,
+                        content:e.target[1].value,
+                        image:blob
+                    })
+                }
+                else{
+                    await indexDB.editPosts.add({
+                        postId: editId.id,
+                        heading:e.target[0].value,
+                        content:e.target[1].value,
+                        image:blob
+                    })
+                }
                 handleEditClose();
                 notifyMe("Feed will be edited once system gets online")
                 handleSyncClick("feedRefresh")
@@ -593,9 +606,19 @@ export default function Feed() {
     async function deletePost(id) {
         if(!navigator.onLine)
         {
-            await indexDB.deletePosts.add({
-                postId: deleteID,
-            })
+            const deleteDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(deleteID).toArray();
+            console.log('delete',deleteDB);
+            if(deleteDB.length>0)
+                {
+                    await indexDB.deletePosts.update(deleteDB[0].id, {
+                        postId: deleteID,
+                    })
+                }
+                else{
+                    await indexDB.deletePosts.add({
+                        postId: deleteID,
+                    })
+                }
             handlePostDeleteClose()
             notifyMe('Feed will be Deleted once system is online.')
             handleSyncClick("feedRefresh")
@@ -713,7 +736,7 @@ export default function Feed() {
                                 {
                                     editId !== null && editId.data.image &&
                                     <>
-                                    <img src={editId.data.image} alt="" srcSet="" />
+                                    <img src={(editId.data.image instanceof Blob)?URL.createObjectURL(editId.data.image):editId.data.image} alt="" srcSet="" />
                                     </>
                                 }
                             </div>
