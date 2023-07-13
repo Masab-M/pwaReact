@@ -87,7 +87,7 @@ export default function Feed() {
             }
         })
         getFeeds().then((data) => {
-            console.log(data);
+            console.log('data',data);
             setPosts(data)
         }).catch(async (err) => {
             handleSyncClick("feedRefresh")
@@ -619,6 +619,11 @@ export default function Feed() {
                         postId: deleteID,
                     })
                 }
+                let filteredArray = posts.filter(item => item.id !== deleteID)
+                console.log('filter',filteredArray);
+                setPosts(filteredArray);
+                const cache = await caches.open("my-cache");
+                await cache.put('firebase-data', new Response(JSON.stringify(filteredArray)));
             handlePostDeleteClose()
             notifyMe('Feed will be Deleted once system is online.')
             handleSyncClick("feedRefresh")
