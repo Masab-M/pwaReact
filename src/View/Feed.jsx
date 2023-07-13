@@ -4,7 +4,7 @@ import { BsFiles, BsPhoneFlip } from "react-icons/bs"
 import { IoMdFlash, IoMdFlashOff } from "react-icons/io"
 import { GrClose } from "react-icons/gr"
 import firebase from '../Utils/Firebase'
-import { getFirestore, collection, getDocs, addDoc, query, orderBy, doc, deleteDoc, setDoc, updateDoc } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, addDoc, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore/lite';
 import { BiImageAdd } from "react-icons/bi"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import "../Assets/CSS/Feed.css"
