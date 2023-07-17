@@ -57,6 +57,7 @@ export default function Location() {
                 });
         }, error => {
             getCacheLocation()
+            
             console.error(error)
         }, {
             timeout: 2000,
@@ -98,7 +99,7 @@ export default function Location() {
         <>
             <div className="locationDetails">
                 {
-                    position && location
+                    position
                         ?
                         <>
                             <div className="timestamp">
@@ -138,12 +139,6 @@ export default function Location() {
                                     <span>{location.address}</span>
                                 </div>
                               
-                            </div>
-                            <div className="LocationDetails">
-                                <div className="ld">
-                                    <span>Accuracy: </span>
-                                    <span>{position?.coords.accuracy}</span>
-                                </div>
                             </div>
                         </>
                         :
