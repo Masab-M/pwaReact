@@ -145,12 +145,12 @@ export default function Feed() {
         if ('serviceWorker' in navigator) {
             const handleMessage = event => {
                 if (event.data.tag === "feedRefresh") {
+                    setRefresh(!refresh);
                     notifyMe("Back Online");
                     setPosts([]);
                     SyncData();
                     syncDelete();
                     syncEdit();
-                    setRefresh(!refresh);
                     findLocation();
                 }
             };
@@ -205,6 +205,7 @@ export default function Feed() {
     async function SyncData() {
         getIndexDBData().then((res) => {
             if (res.length > 0) {
+                alert('data to sync');
                 res.forEach((p) => {
                     let newObj = {
                         indexid: p.id,
@@ -251,7 +252,7 @@ export default function Feed() {
                     } else {
                         return registration.sync.register(tagName)
                             .then(() => {
-                             alert('Sync registered', tagName)
+                             alert('Sync registered')
 
                                 console.log('Sync registered', tagName)
                             })
