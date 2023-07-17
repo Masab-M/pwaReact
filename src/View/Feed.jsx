@@ -363,7 +363,9 @@ export default function Feed() {
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: false,
                 video: {
-                    width: windowDimensions.width, height: windowDimensions.height,
+                    aspectRatio:9/16,
+
+                    width: windowDimensions.width, height: windowDimensions.height+20,
                     facingMode: cameraType ? "user" : "environment"
                 }
             })
@@ -741,6 +743,16 @@ export default function Feed() {
         setPostDeleteModal(true);
     };
     const handleImageEditClose = () => {
+        if (editPostModal && editId) {
+            let postObj = structuredClone(editId);
+            postObj.data.image = null;
+            setEditId(postObj)
+        }
+        else {
+            let postObj = structuredClone(newPost);
+            postObj.image = null;
+            setNewPost(postObj)
+        }
         setImageEditModal(false);
     };
     const handleImageEditShow = () => {
@@ -981,16 +993,6 @@ export default function Feed() {
                         <div className="cropButton">
                             <button onClick={() => {
                                 handleImageEditClose()
-                                if (editPostModal && editId) {
-                                    let postObj = structuredClone(editId);
-                                    postObj.data.image = null;
-                                    setEditId(postObj)
-                                }
-                                else {
-                                    let postObj = structuredClone(newPost);
-                                    postObj.image = null;
-                                    setNewPost(postObj)
-                                }
                             }}>Cancel</button>
                             <button onClick={showCroppedImage}>Crop</button>
                         </div>
@@ -1013,7 +1015,7 @@ export default function Feed() {
 
             <div className="addphoto">
                 <div className={`cameraSection ${cameraAccess ? "show" : "notshow"}`}>
-                    <video ref={videoRef} autoPlay playsInline={true} >
+                    <video style={{height:windowDimensions.height,width:windowDimensions.width}} ref={videoRef} autoPlay playsInline={true} >
                     </video>
                     <div className="camTopActions">
                         <div className="close" onClick={closeCamera}>
