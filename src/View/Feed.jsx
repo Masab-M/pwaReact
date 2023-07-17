@@ -243,6 +243,7 @@ export default function Feed() {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
             navigator.serviceWorker.ready
                 .then(async (registration) => {
+                    alert("sync is register")
                     const tags = await registration.sync.getTags()
                     if (tags.includes(tagName)) {
                         console.log('Sync with tag', tagName, 'already registered')
@@ -250,11 +251,14 @@ export default function Feed() {
                     } else {
                         return registration.sync.register(tagName)
                             .then(() => {
+                             alert('Sync registered', tagName)
+
                                 console.log('Sync registered', tagName)
                             })
                     }
                 })
                 .catch((error) => {
+                    alert("sync is not register")
                     console.log('Sync registration failed:', error);
                 });
         } else {
@@ -571,6 +575,7 @@ export default function Feed() {
         } else if (Notification.permission === "granted") {
             // Check whether notification permissions have already been granted;
             // if so, create a notification
+            alert(message)
             const notification = new Notification(message);
             // …
         } else if (Notification.permission !== "denied") {
