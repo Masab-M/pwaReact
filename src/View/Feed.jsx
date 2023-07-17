@@ -795,14 +795,6 @@ export default function Feed() {
     }
     return (
         <>
-        fullscreen Pixels:
-        {
-            windowDimensions.height
-        }
-        x
-        {
-            windowDimensions.width
-        }
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
                 <div className="newPostPopup">
                     <form ref={newPostRef} action="" onSubmit={handlePostForm}>
