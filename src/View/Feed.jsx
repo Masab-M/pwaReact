@@ -109,7 +109,7 @@ export default function Feed() {
     }
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
     useEffect(() => {
-        syncEdit();
+        // syncEdit();
         getIndexDBData().then((res) => {
             if (res.length > 0) {
                 setDraftPost(res)
@@ -147,7 +147,7 @@ export default function Feed() {
                 if (event.data.tag === "feedRefresh") {
                     setRefresh(!refresh);
                     notifyMe("Back Online");
-                    setPosts([]);
+                    setPosts(null);
                     SyncData();
                     syncDelete();
                     syncEdit();
@@ -167,6 +167,8 @@ export default function Feed() {
     }, []);
     
     async function syncEdit() {
+        alert('edit to sync');
+
         getIndexDBEditData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
@@ -191,6 +193,8 @@ export default function Feed() {
         })
     }
     async function syncDelete() {
+        alert('delete to sync');
+
         getIndexDBDeleteData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
@@ -203,9 +207,9 @@ export default function Feed() {
         })
     }
     async function SyncData() {
+        alert('data to sync');
         getIndexDBData().then((res) => {
             if (res.length > 0) {
-                alert('data to sync');
                 res.forEach((p) => {
                     let newObj = {
                         indexid: p.id,
