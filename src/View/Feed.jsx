@@ -748,6 +748,7 @@ export default function Feed() {
     };
     const handleEditClose = () => {
         setEditPostModal(false);
+        setFormErr(false)
         setEditId(null)
         editPostRef.current.reset()
         setHeadingValue({ value: '', error: false })
@@ -782,6 +783,14 @@ export default function Feed() {
     console.log(contentValue);
     return (
         <>
+        fullscreen Pixels:
+        {
+            windowDimensions.height
+        }
+        x
+        {
+            windowDimensions.width
+        }
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
                 <div className="newPostPopup">
                     <form ref={newPostRef} action="" onSubmit={handlePostForm}>
@@ -914,7 +923,7 @@ export default function Feed() {
                             {
                                 formErr &&
                                 <div className="newPostErr">
-                                    <span>Add Image and Content Please</span>
+                                    <span>Add {!editId.data.image&&"Image,"}{headingValue.value===''&&"Heading,"} {contentValue.value===''&&"Description"}</span>
                                 </div>
                             }
                             <button type='submit'>
