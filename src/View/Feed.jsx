@@ -154,7 +154,6 @@ export default function Feed() {
                         notifyMe("Back Online");
                         setRefresh(!refresh);
                       } catch (error) {
-                        alert(error)
                         // Handle the error here
                         console.error('Error:', error);
                       }
@@ -171,9 +170,8 @@ export default function Feed() {
             window.removeEventListener('resize', handleResize);
           }
     }, []);
-    
+
     async function syncEdit() {
-        alert('edit to sync');
 
         getIndexDBEditData().then((res) => {
             if (res.length > 0) {
@@ -199,7 +197,6 @@ export default function Feed() {
         })
     }
     async function syncDelete() {
-        alert('delete to sync');
 
         getIndexDBDeleteData().then((res) => {
             if (res.length > 0) {
@@ -213,7 +210,6 @@ export default function Feed() {
         })
     }
     async function SyncData() {
-        alert('data to sync');
         getIndexDBData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
@@ -254,7 +250,6 @@ export default function Feed() {
         if ('serviceWorker' in navigator && 'SyncManager' in window) {
             navigator.serviceWorker.ready
                 .then(async (registration) => {
-                    alert("sync is register")
                     const tags = await registration.sync.getTags()
                     if (tags.includes(tagName)) {
                         console.log('Sync with tag', tagName, 'already registered')
@@ -262,14 +257,11 @@ export default function Feed() {
                     } else {
                         return registration.sync.register(tagName)
                             .then(() => {
-                             alert('Sync registered')
-
                                 console.log('Sync registered', tagName)
                             })
                     }
                 })
                 .catch((error) => {
-                    alert("sync is not register")
                     console.log('Sync registration failed:', error);
                 });
         } else {
@@ -581,25 +573,31 @@ export default function Feed() {
         }
       }
       
-    function notifyMe(message) {
-        if (!("Notification" in window)) {
-        } else if (Notification.permission === "granted") {
+      function notifyMe(message) {
+        try {
+          if (!("Notification" in window)) {
+            // Notification API is not supported
+          } else if (Notification.permission === "granted") {
             // Check whether notification permissions have already been granted;
             // if so, create a notification
-            alert(message)
             const notification = new Notification(message);
-            // …
-        } else if (Notification.permission !== "denied") {
+            // ...
+          } else if (Notification.permission !== "denied") {
             // We need to ask the user for permission
             Notification.requestPermission().then((permission) => {
-                // If the user accepts, let's create a notification
-                if (permission === "granted") {
-                    const notification = new Notification("Notification will Show like this");
-                    // …
-                }
+              // If the user accepts, let's create a notification
+              if (permission === "granted") {
+                const notification = new Notification("Notification will Show like this");
+                // ...
+              }
             });
+          }
+        } catch (error) {
+          // Handle any errors that occur
+          console.error("An error occurred while displaying the notification:", error);
         }
-    }
+      }
+      
     function blobToDataURL(blob) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
