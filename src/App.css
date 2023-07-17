@@ -50,7 +50,7 @@ nav .logo {
   font-weight: 700;
 }
 
-.newPostPopup form .contentSection .title input {
+.newPostPopup form .contentSection .title textarea {
   padding: 6px;
   border-radius: 10px;
   border: none;
@@ -82,21 +82,24 @@ nav .logo {
   flex-wrap: wrap;
 }
 
-.location .Longitude, .location .Latitude {
+.location .location_Details {
   display: flex;
   flex-direction: column;
   text-align: left;
   gap: 5px;
 }
 
-.location .Longitude span:first-child, .location .Latitude span:first-child {
+.location .location_Details span:first-child {
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Nunito Sans';
 }
 
-.location .Longitude span:last-child, .location .Latitude span:last-child {
+.location .location_Details span:last-child {
   font-size: 24px;
   font-weight: 800;
+  font-family: 'Nunito Sans';
+
 }
 
 .timestamp {
@@ -109,10 +112,14 @@ nav .logo {
 
 .timestamp span:first-child,.ld span:first-child {
   font-weight: 500;
+  font-family: 'Nunito Sans';
+
 }
 
 .timestamp span:last-child,.ld span:last-child {
   font-weight: 700;
+  font-family: 'Nunito Sans';
+
 }
 
 .ld span {
@@ -265,10 +272,13 @@ nav .logo {
   opacity: 0.5;
 }
 .newPostErr span {
+  display: block;
+  font-family: 'Nunito Sans';
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   color: red;
+  text-align: center;
 }
 .feedlist .post {
   background-color: #f7f7f7;
@@ -346,4 +356,36 @@ nav .logo {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.AppMenus {
+  padding: 15px 0px;
+}
+
+.AppScreeen svg {
+  font-size: 20px;
+  color: #fff;
+}
+.AppNav {
+  position: fixed;
+  bottom: 0px;
+  height: 50px;
+  border-top-right-radius: 20px;
+  left: 0px;
+  background: #5a05c9;
+  right: 0px;
+  width: 100%;
+  border-top-left-radius: 20px;
+}.Menulist {
+  display: flex;
+  justify-content: space-around;
+}
+.LocationErr span {
+  font-family: 'Nunito Sans';
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.LocationErr {
+  text-align: center;
 }

@@ -81,9 +81,7 @@ self.addEventListener("sync", (event) => {
 });
 function sendFeedMessage(tag) {
   self.clients.matchAll().then((clients) => {
-    console.log(clients);
     clients.forEach((client) => {
-      console.log('called');
       client.postMessage({ tag: tag, message: "Sync event completed" });
     });
   });

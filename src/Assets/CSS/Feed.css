@@ -251,10 +251,26 @@
     text-align: center;
     margin-top: 40px;
 }
-.newPostPopup form .contentSection .title input#heading {
+.inputInfo {
+    display: flex;
+    justify-content: space-between;
+}
+
+.inputInfo span {
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Nunito Sans';
+}
+
+.inputInfo span:first-child {
+    color: red;
+}
+.newPostPopup form .contentSection .title textarea#heading {
     font-family: 'Nunito Sans';
     font-size: 24px;
     font-weight: 800;
+    border: none;
+    resize: none;
 }
 
 .newPostPopup form .contentSection  textarea#newPostText {
@@ -266,31 +282,10 @@
 .contentSection .title {
     margin-bottom: 0px !important;
 }
-.AppNav {
-    position: fixed;
-    bottom: 0px;
-    height: 50px;
-    border-top-right-radius: 20px;
-    left: 0px;
-    background: #5a05c9;
-    right: 0px;
-    width: 100%;
-    border-top-left-radius: 20px;
-}
 
-.Menulist {
-    display: flex;
-    justify-content: space-around;
-}
 
-.AppMenus {
-    padding: 15px 0px;
-}
 
-.AppScreeen svg {
-    font-size: 20px;
-    color: #fff;
-}
+
 .postImage .LazyPlaceHolder {
     height: 60vh;
     display: block;
@@ -318,3 +313,28 @@
   .postImage img.loaded {
     opacity: 1;
   }
+  .moreDropDropDown {
+    box-shadow: 1px 0px 9px -3px #0000001a;
+    width: fit-content;
+    display: flex;
+    position: absolute;
+    top: 22px;
+    padding: 10px;
+    gap: 10px;
+    background-color: #fff;
+    flex-direction: column;
+    right: 0px;
+    border-radius: 10px;
+}
+
+.moreInfo svg {color: #000;}
+
+.udActions {
+    position: relative;
+}
+.postContent span.showMoreBtn {
+    cursor: pointer;
+    color: #5a05c9;
+    padding-left: 5px;
+    font-weight: 900;
+}

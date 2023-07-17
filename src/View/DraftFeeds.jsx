@@ -78,7 +78,6 @@ export default function DraftFeeds() {
         getIndexDBData().then((res) => {
             if (res.length > 0) {
                 setDraftPost(res)
-                console.log(res);
             }
             else{
                 setDraftPost([])
@@ -92,7 +91,6 @@ export default function DraftFeeds() {
         setDraftdeleteModal(true);
     };
     async function deleteIndexRow() {
-        console.log(draftDeleteId);
         await indexDB.posts.delete(draftDeleteId)
         handlePostDraftDeleteClose()
         setRefresh(!refresh)
@@ -150,7 +148,6 @@ export default function DraftFeeds() {
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.image) {
             if(imageEdited)
             {
-                console.log('image');
                 let blob = await fetch(editId.image).then(r => r.blob());
                 await indexDB.posts.update(editId.id,
                     {
@@ -190,7 +187,6 @@ export default function DraftFeeds() {
         videoRef.current.srcObject.getVideoTracks().forEach(track => {
             track.stop()
         })
-        console.log(canvasRef.current.toDataURL("image/png"));
         let postObj = structuredClone(editId);
         postObj.image = canvasRef.current.toDataURL("image/png");;
         setEditId(postObj)
@@ -211,7 +207,6 @@ export default function DraftFeeds() {
         var reader = new FileReader();
         reader.onload = function () {
             var dataURL = reader.result;
-            console.log({ [e.target.name]: dataURL })
             if (editPostModal && editId) {
                 let postObj = structuredClone(editId);
                 postObj.image = dataURL;

@@ -1,12 +1,14 @@
 .modal.display-block {
-    display: block;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 0;
-    overflow: hidden;
+  display: block;
+  position: fixed;
+  top: 0;
+  right: 0;
+  background-color: rgb(196 196 196 / 24%);
+  backdrop-filter: blur(4px);
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  overflow: hidden;
   }
   
   .modalOverlay {
@@ -19,7 +21,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
-    max-width: 50%;
+    max-width: 40%;
     margin: 0 auto;
     padding: 9px;
     text-align: center;
@@ -63,3 +65,15 @@
       max-width: 80%;
     }
   }
+  .closeIcon {
+    position: absolute;
+    right: 0px;
+    top: -10px;
+    cursor: pointer;
+}
+
+.closeIcon svg {
+    font-size: 18px;
+    background-color: #fff;
+    border-radius: 4px;
+}

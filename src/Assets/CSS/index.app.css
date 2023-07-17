@@ -1,5 +1,5 @@
 @media (min-width:320px)  { 
-  .feedlist{
+  .feedlist,.locationDetails{
     margin-bottom: 70px;
   }
   .AppNav{
@@ -18,7 +18,7 @@
     }
     /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */ }
   @media (min-width:641px)  {
-    .feedlist{
+    .feedlist,.locationDetails{
       margin-bottom: 10px;
     }
     .AppNav{

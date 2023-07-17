@@ -15,8 +15,39 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { indexDB } from "../Utils/indexdb";
 import SingleDraftFeed from './SingleDraftFeed'
 export default function Feed() {
+    const textAreaRef = useRef(null)
+    const [headingValue, setHeadingValue] = useState({
+        value: "",
+        error: false
+    })
+    const [contentValue, setContentValue] = useState({
+        value: "",
+        error: false
+    })
+    const textHeadingRef = useRef(null)
+    const textHeadingRefNew = useRef(null)
+    const textAreaRefNew = useRef(null)
+    const calculateTextAreaHeight = (ref) => {
+        const element = ref.current;
+        element.style.height = 'auto'; // Reset the height to auto
+        element.style.height = `${element.scrollHeight}px`; // Set the height to the scroll height
+    };
+
+    const handleResizeText = (ref) => {
+        calculateTextAreaHeight(ref);
+    };
+    const calculateHeadingAreaHeight = (ref) => {
+        const element = ref.current;
+        element.style.height = 'auto'; // Reset the height to auto
+        element.style.height = `${element.scrollHeight}px`; // Set the height to the scroll height
+    };
+
+    const handleResizeHeading = (ref) => {
+        calculateHeadingAreaHeight(ref);
+    };
     const db = getFirestore(firebase);
     const [draftPost, setDraftPost] = useState([])
+    const [editPostType, setEditPostType] = useState('')
     const [posts, setPosts] = useState([])
     const newPostRef = useRef(null)
     const editPostRef = useRef(null)
@@ -41,6 +72,7 @@ export default function Feed() {
     const [editPostModal, setEditPostModal] = useState(false)
     const [editId, setEditId] = useState(null)
     const [imageEdited, setImageEdited] = useState(false)
+    const [imageError, setImageError] = useState(false)
     const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
         setCroppedAreaPixels(croppedAreaPixels)
     }, [])
@@ -69,6 +101,7 @@ export default function Feed() {
     }, [croppedAreaPixels, rotation])
     function getWindowDimensions() {
         const { innerWidth: width, innerHeight: height } = window;
+        console.log({ innerWidth: width, innerHeight: height } );
         return {
             width,
             height
@@ -80,14 +113,12 @@ export default function Feed() {
         getIndexDBData().then((res) => {
             if (res.length > 0) {
                 setDraftPost(res)
-                console.log(res);
             }
             else {
                 setDraftPost([])
             }
         })
         getFeeds().then((data) => {
-            console.log('data', data);
             setPosts(data)
         }).catch(async (err) => {
             handleSyncClick("feedRefresh")
@@ -98,11 +129,20 @@ export default function Feed() {
         findLocation()
         function handleResize() {
             setWindowDimensions(getWindowDimensions());
+            if(!editPostModal && !newPostModal) return false
+            if(editPostModal)
+            {
+                handleResizeHeading(textHeadingRef)
+                handleResizeText(textAreaRef)
+            }
+            else if(newPost){
+                handleResizeHeading(textHeadingRefNew)
+                handleResizeText(textAreaRefNew)
+            }
         }
         window.addEventListener('resize', handleResize);
         if ('serviceWorker' in navigator) {
             const handleMessage = event => {
-                console.log('Received message from service worker:', event.data);
                 if (event.data.tag === "feedRefresh") {
                     notifyMe("Back Online");
                     setPosts([]);
@@ -120,12 +160,15 @@ export default function Feed() {
                 window.removeEventListener('resize', handleResize);
             };
         }
+        return () => {
+            window.removeEventListener('resize', handleResize);
+          }
     }, []);
+    
     async function syncEdit() {
         getIndexDBEditData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
-                    console.log(res);
                     let newObj = {
                         id: p.postId,
                         indexid: p.id,
@@ -136,7 +179,6 @@ export default function Feed() {
                         }
                     }
                     setEditId(newObj)
-                    console.log(newObj);
                     if (!(newObj.data.image instanceof Blob)) {
                         editPost(newObj)
                     }
@@ -151,7 +193,6 @@ export default function Feed() {
         getIndexDBDeleteData().then((res) => {
             if (res.length > 0) {
                 res.forEach((p) => {
-                    console.log(res);
                     deletePost(p.postId).then(() => {
                         deleteIndexDeleteKey(p.id)
                         setRefresh(!refresh)
@@ -171,7 +212,6 @@ export default function Feed() {
                         image: p.image,
                         location: p.location
                     }
-                    console.log(newObj);
                     uploadFile(newObj, "new")
                 })
             }
@@ -307,7 +347,6 @@ export default function Feed() {
         const feedCol = collection(db, 'feed')
         const query1 = query(feedCol, orderBy('timestamp', 'desc'));
         const feedSnapshot = await getDocs(query1)
-        console.log(feedSnapshot);
         const feedList = feedSnapshot.docs.map((doc) => {
             return {
                 id: doc.id,
@@ -373,7 +412,6 @@ export default function Feed() {
         videoRef.current.srcObject.getVideoTracks().forEach(track => {
             track.stop()
         })
-        console.log(canvasRef.current.toDataURL("image/png"));
         if (editPostModal && editId) {
             let postObj = structuredClone(editId);
             postObj.data.image = canvasRef.current.toDataURL("image/png");;
@@ -386,6 +424,7 @@ export default function Feed() {
             setNewPost(newObj)
 
         }
+        setImageError(false)
         setFormErr(false)
         handleImageEditShow()
     }
@@ -408,13 +447,6 @@ export default function Feed() {
         });
     }
     async function addPost(obj) {
-        console.log({
-            image: obj.image,
-            content: obj.content,
-            heading: obj.heading,
-            location: location === "" ? obj.location : location,
-            timestamp: Date.now()
-        });
         const docRef = await addDoc(collection(db, "feed"), {
             image: obj.image,
             content: obj.content,
@@ -422,7 +454,6 @@ export default function Feed() {
             location: location === "" ? obj.location : location,
             timestamp: Date.now()
         });
-        console.log("Document written with ID: ", docRef.id);
         if (obj.indexid) {
             deleteIndexRow(obj.indexid).then((res) => {
                 setRefresh(true)
@@ -432,6 +463,8 @@ export default function Feed() {
         else {
             setRefresh(!refresh)
             newPostRef.current.reset();
+            setHeadingValue({ value: '', error: false })
+            setContentValue({ value: '', error: false })
             handleNewPostClose()
             setAddingPost(false)
             setNewPost({})
@@ -440,11 +473,6 @@ export default function Feed() {
     }
     async function editPost(obj) {
         const docRef = doc(db, "feed", editId ? editId.id : obj.id);
-        console.log({
-            image: obj.data.image,
-            content: obj.data.content,
-            heading: obj.data.heading,
-        });
         const data = {
             image: obj.data.image,
             content: obj.data.content,
@@ -452,7 +480,6 @@ export default function Feed() {
         };
         updateDoc(docRef, data)
             .then(docRef => {
-                console.log("Entire Document has been updated successfully", docRef);
                 if (obj.indexid) {
                     deleteIndexEditRow(obj.indexid).then((res) => {
                         setRefresh(!refresh)
@@ -480,16 +507,9 @@ export default function Feed() {
             newObj.heading = e.target[0].value;
             newObj.content = e.target[1].value;
             newObj.image = blob
-            console.log('log', newObj);
             setNewPost(newObj)
             if (!navigator.onLine) {
                 try {
-                    console.log({
-                        heading: e.target[0].value,
-                        content: e.target[1].value,
-                        image: blob,
-                        location: location,
-                    });
                     await indexDB.posts.add({
                         heading: e.target[0].value,
                         content: e.target[1].value,
@@ -497,6 +517,8 @@ export default function Feed() {
                         location: location,
                     })
                     e.target.reset();
+                    setHeadingValue({ value: '', error: false })
+                    setContentValue({ value: '', error: false })
                     handleNewPostClose();
                     setNewPost({})
                     notifyMe('Draft Feed will be uploaded once system is online.')
@@ -516,28 +538,33 @@ export default function Feed() {
         }
     }
     function handleChangeImage(e) {
-        closeCamera()
+        closeCamera();
         var input = e.target;
-        var reader = new FileReader();
-        reader.onload = function () {
+        var file = input.files[0];
+        if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+          var reader = new FileReader();
+          reader.onload = function () {
             var dataURL = reader.result;
-            console.log({ [e.target.name]: dataURL })
             if (editPostModal && editId) {
-                let postObj = structuredClone(editId);
-                postObj.data.image = dataURL;
-                setEditId(postObj)
-                setImageEdited(true)
+              let postObj = structuredClone(editId);
+              postObj.data.image = dataURL;
+              setEditId(postObj);
+              setImageEdited(true);
+            } else {
+              let newObj = structuredClone(newPost);
+              newObj.image = dataURL;
+              setNewPost(newObj);
             }
-            else {
-                let newObj = structuredClone(newPost);
-                newObj.image = dataURL
-                setNewPost(newObj)
-            }
-            setFormErr(false)
-            handleImageEditShow()
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
+            setImageError(false)
+            setFormErr(false);
+            handleImageEditShow();
+          };
+          reader.readAsDataURL(file);
+        } else {
+            setImageError(true)
+        }
+      }
+      
     function notifyMe(message) {
         if (!("Notification" in window)) {
         } else if (Notification.permission === "granted") {
@@ -569,85 +596,90 @@ export default function Feed() {
     async function handleEditForm(e) {
         e.preventDefault()
         if (e.target[0].value !== '' && e.target[1].value !== '' && editId.data.image) {
-            console.log(editId.data.image);
             let blob = !imageEdited ? editId.data.image : await fetch(editId.data.image).then(r => r.blob());
             let newObj = editId;
             newObj.data.heading = e.target[0].value;
             newObj.data.content = e.target[1].value;
             newObj.data.image = blob;
-            console.log({
-                postId: editId.id,
-                heading: e.target[0].value,
-                content: e.target[1].value,
-                image: blob
-            });
             setEditId(newObj)
-            if (!navigator.onLine) {
-                const editDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(editId.id).toArray();
-                console.log('edit', editDB);
-                if (editDB.length > 0) {
-                    await indexDB.editPosts.update(editDB[0].id, {
-                        heading: e.target[0].value,
-                        content: e.target[1].value,
-                        image: blob
-                    })
-                }
-                else {
-                    await indexDB.editPosts.add({
-                        postId: editId.id,
-                        heading: e.target[0].value,
-                        content: e.target[1].value,
-                        image: blob
-                    })
-                }
-                const updatedItems = [...posts];
-                const index = updatedItems.findIndex(item => item.id === editId.id);
-                if (index !== -1) {
-                    let data = {}
-                    console.log(blob);
-                    if (blob instanceof Blob) {
-                       await blobToDataURL(blob)
-                            .then((dataURL) => {
-                                console.log(dataURL);
-                                data = {
-                                    heading: e.target[0].value,
-                                    content: e.target[1].value,
-                                    image:dataURL
-                                }
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                            });
-                        
-                    }
-                    else {
-                        data = {
+            if(editPostType==="draft")
+            {
+                console.log(editId.id);
+                const editDB = await indexDB.posts.where("id").equals(editId.id).first();
+                    if (editDB) {
+                        await indexDB.posts.update(editDB.id, {
                             heading: e.target[0].value,
                             content: e.target[1].value,
-                        }
+                            image: blob
+                        })
+                        notifyMe("Feed will be edited once system gets online")
                     }
-                    const updatedItem = {
-                        ...updatedItems[index],
-                        data: data
-                    }; // Create a new object with the updated properties
-                    console.log(updatedItem, 'item');
-                    updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
-                    setPosts(updatedItems);
-                    const cache = await caches.open("my-cache");
-                    await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));
-                }
-                handleEditClose();
-                notifyMe("Feed will be edited once system gets online")
-                handleSyncClick("feedRefresh")
+                    handleEditClose();
             }
-            else {
-                if (!imageEdited) {
-                    editPost(newObj)
+            else{
+                if (!navigator.onLine) {
+                    const editDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(editId.id).toArray();
+                    if (editDB.length > 0) {
+                        await indexDB.editPosts.update(editDB[0].id, {
+                            heading: e.target[0].value,
+                            content: e.target[1].value,
+                            image: blob
+                        })
+                    }
+                    else {
+                        await indexDB.editPosts.add({
+                            postId: editId.id,
+                            heading: e.target[0].value,
+                            content: e.target[1].value,
+                            image: blob
+                        })
+                    }
+                    const updatedItems = [...posts];
+                    const index = updatedItems.findIndex(item => item.id === editId.id);
+                    if (index !== -1) {
+                        let data = {}
+                        if (blob instanceof Blob) {
+                            await blobToDataURL(blob)
+                                .then((dataURL) => {
+                                    data = {
+                                        heading: e.target[0].value,
+                                        content: e.target[1].value,
+                                        image: dataURL
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error(error);
+                                });
+    
+                        }
+                        else {
+                            data = {
+                                heading: e.target[0].value,
+                                content: e.target[1].value,
+                            }
+                        }
+                        const updatedItem = {
+                            ...updatedItems[index],
+                            data: data
+                        };
+                        updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
+                        setPosts(updatedItems);
+                        const cache = await caches.open("my-cache");
+                        await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));
+                    }
+                    handleEditClose();
+                    notifyMe("Feed will be edited once system gets online")
+                    handleSyncClick("feedRefresh")
                 }
                 else {
-                    uploadFile(newObj, "edit")
+                    if (!imageEdited) {
+                        editPost(newObj)
+                    }
+                    else {
+                        uploadFile(newObj, "edit")
+                    }
+                    setAddingPost(true)
                 }
-                setAddingPost(true)
             }
         }
         else {
@@ -655,40 +687,47 @@ export default function Feed() {
         }
     }
     async function deletePost(id) {
-        if (!navigator.onLine) {
-            const deleteDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(deleteID).toArray();
-            console.log('delete', deleteDB);
-            if (deleteDB.length > 0) {
-                await indexDB.deletePosts.update(deleteDB[0].id, {
-                    postId: deleteID,
-                })
-            }
-            else {
-                await indexDB.deletePosts.add({
-                    postId: deleteID,
-                })
-            }
-            let filteredArray = posts.filter(item => item.id !== deleteID)
-            console.log('filter', filteredArray);
-            setPosts(filteredArray);
-            const cache = await caches.open("my-cache");
-            await cache.put('firebase-data', new Response(JSON.stringify(filteredArray)));
-            handlePostDeleteClose()
-            notifyMe('Feed will be Deleted once system is online.')
-            handleSyncClick("feedRefresh")
-        }
-        else {
-            await deleteDoc(doc(db, "feed", id)).then((res) => {
-                console.log('deleted');
-                notifyMe("Your feed has been successfully deleted.")
-            })
+        if(editPostType==='draft'){
+            deleteIndexRow(id)
             handlePostDeleteClose()
             setRefresh(!refresh)
         }
+        else{
+            if (!navigator.onLine) {
+                const deleteDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(deleteID).toArray();
+                if (deleteDB.length > 0) {
+                    await indexDB.deletePosts.update(deleteDB[0].id, {
+                        postId: deleteID,
+                    })
+                }
+                else {
+                    await indexDB.deletePosts.add({
+                        postId: deleteID,
+                    })
+                }
+                let filteredArray = posts.filter(item => item.id !== deleteID)
+                setPosts(filteredArray);
+                const cache = await caches.open("my-cache");
+                await cache.put('firebase-data', new Response(JSON.stringify(filteredArray)));
+                handlePostDeleteClose()
+                notifyMe('Feed will be Deleted once system is online.')
+                handleSyncClick("feedRefresh")
+            }
+            else {
+                await deleteDoc(doc(db, "feed", id)).then((res) => {
+                    notifyMe("Your feed has been successfully deleted.")
+                })
+                handlePostDeleteClose()
+                setRefresh(!refresh)
+            }
+        }
+        console.log('Delete ID',id);
     }
     const handleNewPostClose = () => {
         setNewPostModal(false);
         setNewPost({})
+        setImageError(false)
+        setFormErr(false)
     };
     const handleNewPostShow = () => {
         setNewPostModal(true);
@@ -709,11 +748,37 @@ export default function Feed() {
     const handleEditClose = () => {
         setEditPostModal(false);
         setEditId(null)
+        editPostRef.current.reset()
+        setHeadingValue({ value: '', error: false })
+        setContentValue({ value: '', error: false })
+        setAddingPost(false)
+        setEditId(null)
+        setImageEdited(false)
     };
     const handleEditShow = () => {
         setEditPostModal(true);
     };
-    console.log(editId);
+    useEffect(() => {
+        handleResizeText(textAreaRef)
+        handleResizeHeading(textHeadingRef)
+        console.log(editId);
+    }, [editId])
+    function checkHeadingCount(e) {
+        if (e.target.value.length <= 50 || e.target.value.length === 0) {
+            setHeadingValue({ error: false, value: e.target.value });
+        } else {
+            setHeadingValue({ ...headingValue, error: true });
+        }
+    }
+    function checkContentCount(e) {
+        if (e.target.value.length <= 3000 || e.target.value.length === 0) {
+            setContentValue({ error: false, value: e.target.value })
+        }
+        else {
+            setContentValue({ ...contentValue, error: true })
+        }
+    }
+    console.log(contentValue);
     return (
         <>
             <Modal show={newPostModal} handleClose={handleNewPostClose}>
@@ -722,15 +787,40 @@ export default function Feed() {
                         <div className="contentSection">
                             <div className="title">
                                 <label htmlFor="heading">Heading</label>
-                                <input disabled={addingPost} type="text" name="heading" id="heading" placeholder='Add Post Heading' />
+                                <textarea value={headingValue.value} row={1} ref={textHeadingRefNew} onChange={checkHeadingCount} rows={1} disabled={addingPost} onInput={() => { handleResizeHeading(textHeadingRefNew) }} name="heading" id="heading" placeholder='Add Post Heading' />
+                                <div className="inputInfo">
+                                    <span>
+                                        {
+                                            headingValue.error ?
+                                                "Only 50 Characters" : ""
+                                        }
+                                    </span>
+                                    <span>{headingValue.value.length}/50</span>
+                                </div>
                             </div>
                             <div className="newPostContent">
                                 <label htmlFor="Content">Description</label>
-                                <textarea disabled={addingPost} onChange={() => {
+                                <textarea ref={textAreaRefNew} value={contentValue.value} onInput={() => { handleResizeText(textAreaRefNew) }} disabled={addingPost} onChange={(e) => {
+                                    checkContentCount(e)
                                     setFormErr(false)
-                                }} name="newPostText" id="newPostText" cols="30" rows="3" placeholder='Type Your Post Content'></textarea>
+                                }} name="newPostText" id="newPostText" cols="30" rows="1" placeholder='Type Your Post Content'></textarea>
+                                <div className="inputInfo">
+                                    <span>
+                                        {
+                                            contentValue.error ?
+                                                "Only 3000 Characters" : ""
+                                        }
+                                    </span>
+                                    <span>{contentValue.value.length}/3000</span>
+                                </div>
                             </div>
                             <div className="ContentI">
+                                {
+                                    imageError &&
+                                      <div className="newPostErr">
+                                          <span>Only add image files with the extensions 'png' and 'jpeg'.</span>
+                                      </div>
+                                }
                                 {
                                     newPost.image &&
                                     <img src={newPost.image} alt="" srcset="" />
@@ -750,7 +840,7 @@ export default function Feed() {
                             {
                                 formErr &&
                                 <div className="newPostErr">
-                                    <span>Add Image and Content Please</span>
+                                    <span>Add image and content first.</span>
                                 </div>
                             }
                             <button type='submit'>
@@ -771,15 +861,35 @@ export default function Feed() {
                         <div className="contentSection">
                             <div className="title">
                                 <label htmlFor="heading">Heading</label>
-                                <input disabled={addingPost} onChange={() => {
+                                <textarea value={headingValue.value} maxLength={50} rows={1} ref={textHeadingRef} onInput={() => { handleResizeHeading(textHeadingRef) }} disabled={addingPost} onChange={(e) => {
+                                    checkHeadingCount(e)
                                     setFormErr(false)
-                                }} type="text" defaultValue={editId && editId.data.heading} name="heading" id="heading" placeholder='Add Post Heading' />
+                                }} type="text"  name="heading" id="heading" placeholder='Add Post Heading' />
+                                  <div className="inputInfo">
+                                    <span>
+                                        {
+                                            headingValue.error ?
+                                                "Only 50 Characters" : ""
+                                        }
+                                    </span>
+                                    <span>{headingValue.value.length}/50</span>
+                                </div>
                             </div>
                             <div className="newPostContent">
                                 <label htmlFor="Content">Description</label>
-                                <textarea disabled={addingPost} onChange={() => {
+                                <textarea value={contentValue.value} ref={textAreaRef} maxLength={3000} onInput={() => { handleResizeText(textAreaRef) }} disabled={addingPost} onChange={(e) => {
+                                    checkContentCount(e)
                                     setFormErr(false)
-                                }} name="newPostText" defaultValue={editId !== null && editId.data.content} id="newPostText" cols="30" rows="3" placeholder='Type Your Post Content'></textarea>
+                                }} name="newPostText"  id="newPostText" cols="30" rows="1" placeholder='Type Your Post Content'></textarea>
+                                  <div className="inputInfo">
+                                    <span>
+                                        {
+                                            contentValue.error ?
+                                                "Only 50 Characters" : ""
+                                        }
+                                    </span>
+                                    <span>{contentValue.value.length}/3000</span>
+                                </div>
                             </div>
                             <div className="ContentI">
                                 {
@@ -841,7 +951,7 @@ export default function Feed() {
                                 <label htmlFor="">Zoom</label>
                                 <input type="range" value={zoom} onChange={(e) => {
                                     setZoom(e.target.value)
-                                }} min="1" max="10" step={1} className="slider" id="myRange" />
+                                }} min={0} max="10" step={1} className="slider" id="myRange" />
                                 <div className="insSpan">
                                     <span>0</span>
                                     <span>10x</span>
@@ -942,7 +1052,7 @@ export default function Feed() {
                     draftPost ?
                         draftPost.length > 0 ?
                             draftPost.slice(0).reverse().map((p, i) =>
-                                <SingleDraftFeed key={i} data={p} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} />
+                                <SingleDraftFeed key={i} data={p} setEditPostType={setEditPostType} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} />
                             )
                             : ''
                         : ''
@@ -951,7 +1061,7 @@ export default function Feed() {
                     posts ?
                         posts.length > 0 ?
                             posts.map((p, i) =>
-                                <SingleFeed key={i} data={p.data} id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} />
+                                <SingleFeed key={i} data={p.data} setEditPostType={setEditPostType}  id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} />
                             )
                             :
                             <div className="postEmpty">
