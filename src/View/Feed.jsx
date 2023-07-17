@@ -363,9 +363,7 @@ export default function Feed() {
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: false,
                 video: {
-                    aspectRatio:9/16,
-
-                    width: windowDimensions.width, height: windowDimensions.height+20,
+                    aspectRatio:1/1,
                     facingMode: cameraType ? "user" : "environment"
                 }
             })
