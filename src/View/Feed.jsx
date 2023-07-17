@@ -11,7 +11,6 @@ import "../Assets/CSS/Feed.css"
 import Modal from '../Partials/Modal'
 import Cropper from 'react-easy-crop'
 import getCroppedImg from '../Partials/Crop/GetCropImage'
-import { useLiveQuery } from "dexie-react-hooks";
 import { indexDB } from "../Utils/indexdb";
 import SingleDraftFeed from './SingleDraftFeed'
 export default function Feed() {
@@ -101,7 +100,6 @@ export default function Feed() {
     }, [croppedAreaPixels, rotation])
     function getWindowDimensions() {
         const { innerWidth: width, innerHeight: height } = window;
-        console.log({ innerWidth: width, innerHeight: height } );
         return {
             width,
             height
@@ -154,7 +152,6 @@ export default function Feed() {
                         notifyMe("Back Online");
                         setRefresh(!refresh);
                       } catch (error) {
-                        // Handle the error here
                         console.error('Error:', error);
                       }
                 }
@@ -252,12 +249,10 @@ export default function Feed() {
                 .then(async (registration) => {
                     const tags = await registration.sync.getTags()
                     if (tags.includes(tagName)) {
-                        console.log('Sync with tag', tagName, 'already registered')
                         return Promise.resolve()
                     } else {
                         return registration.sync.register(tagName)
                             .then(() => {
-                                console.log('Sync registered', tagName)
                             })
                     }
                 })
@@ -455,7 +450,7 @@ export default function Feed() {
         });
     }
     async function addPost(obj) {
-        const docRef = await addDoc(collection(db, "feed"), {
+        await addDoc(collection(db, "feed"), {
             image: obj.image,
             content: obj.content,
             heading: obj.heading,
@@ -1083,6 +1078,7 @@ export default function Feed() {
                                 <SingleFeed key={i} data={p.data} setEditPostType={setEditPostType}  id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} />
                             )
                             :
+                            draftPost.length===0&&
                             <div className="postEmpty">
                                 <span>Be First to add new Feed</span>
                             </div>
