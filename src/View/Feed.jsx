@@ -743,16 +743,6 @@ export default function Feed() {
         setPostDeleteModal(true);
     };
     const handleImageEditClose = () => {
-        if (editPostModal && editId) {
-            let postObj = structuredClone(editId);
-            postObj.data.image = null;
-            setEditId(postObj)
-        }
-        else {
-            let postObj = structuredClone(newPost);
-            postObj.image = null;
-            setNewPost(postObj)
-        }
         setImageEditModal(false);
     };
     const handleImageEditShow = () => {
@@ -793,6 +783,18 @@ export default function Feed() {
         }
     }
     console.log(contentValue);
+    function clearImage() {
+        if (editPostModal && editId) {
+            let postObj = structuredClone(editId);
+            postObj.data.image = null;
+            setEditId(postObj)
+        }
+        else {
+            let postObj = structuredClone(newPost);
+            postObj.image = null;
+            setNewPost(postObj)
+        }
+    }
     return (
         <>
         fullscreen Pixels:
@@ -950,7 +952,7 @@ export default function Feed() {
                     </form>
                 </div>
             </Modal>
-            <Modal show={imageEditModal} handleClose={handleImageEditClose}>
+            <Modal clearImage={clearImage}  show={imageEditModal} handleClose={handleImageEditClose}>
                 <div className="imageCrop">
                     <div className="image">
                         <Cropper
@@ -993,6 +995,7 @@ export default function Feed() {
                         <div className="cropButton">
                             <button onClick={() => {
                                 handleImageEditClose()
+                                clearImage()
                             }}>Cancel</button>
                             <button onClick={showCroppedImage}>Crop</button>
                         </div>
