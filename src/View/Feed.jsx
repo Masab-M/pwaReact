@@ -128,6 +128,7 @@ export default function Feed() {
     useEffect(() => {
         findLocation()
         function handleResize() {
+            console.log('resize');
             setWindowDimensions(getWindowDimensions());
             if(!editPostModal && !newPostModal) return false
             if(editPostModal)
