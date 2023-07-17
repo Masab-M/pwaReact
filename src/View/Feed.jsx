@@ -146,12 +146,12 @@ export default function Feed() {
             const handleMessage = event => {
                 if (event.data.tag === "feedRefresh") {
                     setRefresh(!refresh);
-                    notifyMe("Back Online");
-                    setPosts(null);
+                    setPosts([]);
                     SyncData();
                     syncDelete();
                     syncEdit();
                     findLocation();
+                    notifyMe("Back Online");
                 }
             };
 
