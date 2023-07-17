@@ -145,13 +145,19 @@ export default function Feed() {
         if ('serviceWorker' in navigator) {
             const handleMessage = event => {
                 if (event.data.tag === "feedRefresh") {
-                    setRefresh(!refresh);
-                    setPosts([]);
-                    SyncData();
-                    syncDelete();
-                    syncEdit();
-                    findLocation();
-                    notifyMe("Back Online");
+                    try {
+                        setPosts([]);
+                        SyncData();
+                        syncDelete();
+                        syncEdit();
+                        findLocation();
+                        notifyMe("Back Online");
+                        setRefresh(!refresh);
+                      } catch (error) {
+                        alert(error)
+                        // Handle the error here
+                        console.error('Error:', error);
+                      }
                 }
             };
 
