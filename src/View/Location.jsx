@@ -99,7 +99,7 @@ export default function Location() {
         <>
             <div className="locationDetails">
                 {
-                    position
+                    position && location
                         ?
                         <>
                             <div className="timestamp">
