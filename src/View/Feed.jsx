@@ -5,6 +5,7 @@ import { IoMdFlash, IoMdFlashOff } from "react-icons/io"
 import { GrClose } from "react-icons/gr"
 import firebase from '../Utils/Firebase'
 import { getFirestore, collection, getDocs, addDoc, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore/lite';
+import { getMessaging, getToken } from "firebase/messaging";
 import { BiImageAdd } from "react-icons/bi"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import "../Assets/CSS/Feed.css"
@@ -45,6 +46,7 @@ export default function Feed() {
         calculateHeadingAreaHeight(ref);
     };
     const db = getFirestore(firebase);
+    const messaging = getMessaging(firebase);
     const [draftPost, setDraftPost] = useState([])
     const [editPostType, setEditPostType] = useState('')
     const [posts, setPosts] = useState([])
@@ -107,6 +109,20 @@ export default function Feed() {
     }
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
     useEffect(() => {
+        getToken(messaging, { vapidKey: 'BIzKOvgVoHRPFInzJ0O7rGWRGUrWncaDF2i0uDZ8PtWHW14EieVj9dn4gYJQ4CHAu68teNS1_DBWYk1ZmemjhL0' }).then((currentToken) => {
+            if (currentToken) {
+                console.log(currentToken);
+              // Send the token to your server and update the UI if necessary
+              // ...
+            } else {
+              // Show permission request UI
+              console.log('No registration token available. Request permission to generate one.');
+              // ...
+            }
+          }).catch((err) => {
+            console.log('An error occurred while retrieving token. ', err);
+            // ...
+          });
         // syncEdit();
         getIndexDBData().then((res) => {
             if (res.length > 0) {
@@ -575,20 +591,21 @@ export default function Feed() {
           } else if (Notification.permission === "granted") {
             // Check whether notification permissions have already been granted;
             // if so, create a notification
+            alert('notification already granted')
+
             const notification = new Notification(message);
-            // ...
           } else if (Notification.permission !== "denied") {
             // We need to ask the user for permission
             Notification.requestPermission().then((permission) => {
               // If the user accepts, let's create a notification
               if (permission === "granted") {
+                alert('notification granted')
                 const notification = new Notification("Notification will Show like this");
-                // ...
               }
             });
           }
         } catch (error) {
-          // Handle any errors that occur
+
           alert(error)
           console.error("An error occurred while displaying the notification:", error);
         }
