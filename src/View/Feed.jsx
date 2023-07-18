@@ -589,6 +589,7 @@ export default function Feed() {
           }
         } catch (error) {
           // Handle any errors that occur
+          alert(error)
           console.error("An error occurred while displaying the notification:", error);
         }
       }
