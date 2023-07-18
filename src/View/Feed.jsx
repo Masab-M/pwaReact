@@ -112,17 +112,17 @@ export default function Feed() {
         getToken(messaging, { vapidKey: 'BIzKOvgVoHRPFInzJ0O7rGWRGUrWncaDF2i0uDZ8PtWHW14EieVj9dn4gYJQ4CHAu68teNS1_DBWYk1ZmemjhL0' }).then((currentToken) => {
             if (currentToken) {
                 console.log(currentToken);
-              // Send the token to your server and update the UI if necessary
-              // ...
+                // Send the token to your server and update the UI if necessary
+                // ...
             } else {
-              // Show permission request UI
-              console.log('No registration token available. Request permission to generate one.');
-              // ...
+                // Show permission request UI
+                console.log('No registration token available. Request permission to generate one.');
+                // ...
             }
-          }).catch((err) => {
+        }).catch((err) => {
             console.log('An error occurred while retrieving token. ', err);
             // ...
-          });
+        });
         // syncEdit();
         getIndexDBData().then((res) => {
             if (res.length > 0) {
@@ -144,13 +144,12 @@ export default function Feed() {
         function handleResize() {
             console.log('resize');
             setWindowDimensions(getWindowDimensions());
-            if(!editPostModal && !newPostModal) return false
-            if(editPostModal)
-            {
+            if (!editPostModal && !newPostModal) return false
+            if (editPostModal) {
                 handleResizeHeading(textHeadingRef)
                 handleResizeText(textAreaRef)
             }
-            else if(newPost){
+            else if (newPost) {
                 handleResizeHeading(textHeadingRefNew)
                 handleResizeText(textAreaRefNew)
             }
@@ -167,9 +166,9 @@ export default function Feed() {
                         findLocation();
                         notifyMe("Back Online");
                         setRefresh(!refresh);
-                      } catch (error) {
+                    } catch (error) {
                         console.error('Error:', error);
-                      }
+                    }
                 }
             };
 
@@ -181,7 +180,7 @@ export default function Feed() {
         }
         return () => {
             window.removeEventListener('resize', handleResize);
-          }
+        }
     }, []);
 
     async function syncEdit() {
@@ -381,7 +380,7 @@ export default function Feed() {
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: false,
                 video: {
-                    aspectRatio:1/1,
+                    aspectRatio: 1 / 1,
                     facingMode: cameraType ? "user" : "environment"
                 }
             })
@@ -561,56 +560,57 @@ export default function Feed() {
         var input = e.target;
         var file = input.files[0];
         if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-          var reader = new FileReader();
-          reader.onload = function () {
-            var dataURL = reader.result;
-            if (editPostModal && editId) {
-              let postObj = structuredClone(editId);
-              postObj.data.image = dataURL;
-              setEditId(postObj);
-              setImageEdited(true);
-            } else {
-              let newObj = structuredClone(newPost);
-              newObj.image = dataURL;
-              setNewPost(newObj);
-            }
-            setImageError(false)
-            setFormErr(false);
-            handleImageEditShow();
-          };
-          reader.readAsDataURL(file);
+            var reader = new FileReader();
+            reader.onload = function () {
+                var dataURL = reader.result;
+                if (editPostModal && editId) {
+                    let postObj = structuredClone(editId);
+                    postObj.data.image = dataURL;
+                    setEditId(postObj);
+                    setImageEdited(true);
+                } else {
+                    let newObj = structuredClone(newPost);
+                    newObj.image = dataURL;
+                    setNewPost(newObj);
+                }
+                setImageError(false)
+                setFormErr(false);
+                handleImageEditShow();
+            };
+            reader.readAsDataURL(file);
         } else {
             setImageError(true)
         }
-      }
-      
-      function notifyMe(message) {
-        try {
-          if (!("Notification" in window)) {
-            // Notification API is not supported
-          } else if (Notification.permission === "granted") {
-            // Check whether notification permissions have already been granted;
-            // if so, create a notification
-            alert('notification already granted')
+    }
 
-            const notification = new Notification(message);
-          } else if (Notification.permission !== "denied") {
-            // We need to ask the user for permission
-            Notification.requestPermission().then((permission) => {
-              // If the user accepts, let's create a notification
-              if (permission === "granted") {
-                alert('notification granted')
-                const notification = new Notification("Notification will Show like this");
-              }
-            });
-          }
+    function notifyMe(message) {
+        try {
+            if (!("Notification" in window)) {
+                // Notification API is not supported
+            } else if (Notification.permission === "granted") {
+                // Check whether notification permissions have already been granted;
+                // if so, create a notification
+                alert('notification already granted')
+
+                self.registration.showNotification(message);
+                // const notification = new Notification(message);
+            } else if (Notification.permission !== "denied") {
+                // We need to ask the user for permission
+                Notification.requestPermission().then((permission) => {
+                    // If the user accepts, let's create a notification
+                    if (permission === "granted") {
+                        alert('notification granted')
+                        self.registration.showNotification("Notification will Show like this");
+                    }
+                });
+            }
         } catch (error) {
 
-          alert(error)
-          console.error("An error occurred while displaying the notification:", error);
+            alert(error)
+            console.error("An error occurred while displaying the notification:", error);
         }
-      }
-      
+    }
+
     function blobToDataURL(blob) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -630,21 +630,20 @@ export default function Feed() {
             newObj.data.content = e.target[1].value;
             newObj.data.image = blob;
             setEditId(newObj)
-            if(editPostType==="draft")
-            {
+            if (editPostType === "draft") {
                 console.log(editId.id);
                 const editDB = await indexDB.posts.where("id").equals(editId.id).first();
-                    if (editDB) {
-                        await indexDB.posts.update(editDB.id, {
-                            heading: e.target[0].value,
-                            content: e.target[1].value,
-                            image: blob
-                        })
-                        notifyMe("Feed will be edited once system gets online")
-                    }
-                    handleEditClose();
+                if (editDB) {
+                    await indexDB.posts.update(editDB.id, {
+                        heading: e.target[0].value,
+                        content: e.target[1].value,
+                        image: blob
+                    })
+                    notifyMe("Feed will be edited once system gets online")
+                }
+                handleEditClose();
             }
-            else{
+            else {
                 if (!navigator.onLine) {
                     const editDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(editId.id).toArray();
                     if (editDB.length > 0) {
@@ -678,7 +677,7 @@ export default function Feed() {
                                 .catch((error) => {
                                     console.error(error);
                                 });
-    
+
                         }
                         else {
                             data = {
@@ -715,12 +714,12 @@ export default function Feed() {
         }
     }
     async function deletePost(id) {
-        if(editPostType==='draft'){
+        if (editPostType === 'draft') {
             deleteIndexRow(id)
             handlePostDeleteClose()
             setRefresh(!refresh)
         }
-        else{
+        else {
             if (!navigator.onLine) {
                 const deleteDB = await indexDB.editPosts.where("postId").equalsIgnoreCase(deleteID).toArray();
                 if (deleteDB.length > 0) {
@@ -749,7 +748,7 @@ export default function Feed() {
                 setRefresh(!refresh)
             }
         }
-        console.log('Delete ID',id);
+        console.log('Delete ID', id);
     }
     const handleNewPostClose = () => {
         setNewPostModal(false);
@@ -858,9 +857,9 @@ export default function Feed() {
                             <div className="ContentI">
                                 {
                                     imageError &&
-                                      <div className="newPostErr">
-                                          <span>Only add image files with the extensions 'png' and 'jpeg'.</span>
-                                      </div>
+                                    <div className="newPostErr">
+                                        <span>Only add image files with the extensions 'png' and 'jpeg'.</span>
+                                    </div>
                                 }
                                 {
                                     newPost.image &&
@@ -905,8 +904,8 @@ export default function Feed() {
                                 <textarea value={headingValue.value} maxLength={50} rows={1} ref={textHeadingRef} onInput={() => { handleResizeHeading(textHeadingRef) }} disabled={addingPost} onChange={(e) => {
                                     checkHeadingCount(e)
                                     setFormErr(false)
-                                }} type="text"  name="heading" id="heading" placeholder='Add Post Heading' />
-                                  <div className="inputInfo">
+                                }} type="text" name="heading" id="heading" placeholder='Add Post Heading' />
+                                <div className="inputInfo">
                                     <span>
                                         {
                                             headingValue.error ?
@@ -921,8 +920,8 @@ export default function Feed() {
                                 <textarea value={contentValue.value} ref={textAreaRef} maxLength={3000} onInput={() => { handleResizeText(textAreaRef) }} disabled={addingPost} onChange={(e) => {
                                     checkContentCount(e)
                                     setFormErr(false)
-                                }} name="newPostText"  id="newPostText" cols="30" rows="1" placeholder='Type Your Post Content'></textarea>
-                                  <div className="inputInfo">
+                                }} name="newPostText" id="newPostText" cols="30" rows="1" placeholder='Type Your Post Content'></textarea>
+                                <div className="inputInfo">
                                     <span>
                                         {
                                             contentValue.error ?
@@ -954,7 +953,7 @@ export default function Feed() {
                             {
                                 formErr &&
                                 <div className="newPostErr">
-                                    <span>Add {!editId.data.image&&"Image,"}{headingValue.value===''&&"Heading,"} {contentValue.value===''&&"Description"}</span>
+                                    <span>Add {!editId.data.image && "Image,"}{headingValue.value === '' && "Heading,"} {contentValue.value === '' && "Description"}</span>
                                 </div>
                             }
                             <button type='submit'>
@@ -969,7 +968,7 @@ export default function Feed() {
                     </form>
                 </div>
             </Modal>
-            <Modal clearImage={clearImage}  show={imageEditModal} handleClose={handleImageEditClose}>
+            <Modal clearImage={clearImage} show={imageEditModal} handleClose={handleImageEditClose}>
                 <div className="imageCrop">
                     <div className="image">
                         <Cropper
@@ -1035,7 +1034,7 @@ export default function Feed() {
 
             <div className="addphoto">
                 <div className={`cameraSection ${cameraAccess ? "show" : "notshow"}`}>
-                    <video style={{height:windowDimensions.height,width:windowDimensions.width}} ref={videoRef} autoPlay playsInline={true} >
+                    <video style={{ height: windowDimensions.height, width: windowDimensions.width }} ref={videoRef} autoPlay playsInline={true} >
                     </video>
                     <div className="camTopActions">
                         <div className="close" onClick={closeCamera}>
@@ -1093,10 +1092,10 @@ export default function Feed() {
                     posts ?
                         posts.length > 0 ?
                             posts.map((p, i) =>
-                                <SingleFeed key={i} data={p.data} setEditPostType={setEditPostType}  id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} />
+                                <SingleFeed key={i} data={p.data} setEditPostType={setEditPostType} id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} />
                             )
                             :
-                            draftPost.length===0&&
+                            draftPost.length === 0 &&
                             <div className="postEmpty">
                                 <span>Be First to add new Feed</span>
                             </div>
