@@ -585,32 +585,37 @@ export default function Feed() {
 
     function notifyMe(message) {
         try {
-            if (!("Notification" in window)) {
-                // Notification API is not supported
-            } else if (Notification.permission === "granted") {
-                // Check whether notification permissions have already been granted;
-                // if so, create a notification
-                alert('notification already granted')
-
-                self.registration.showNotification(message);
-                // const notification = new Notification(message);
-            } else if (Notification.permission !== "denied") {
-                // We need to ask the user for permission
-                Notification.requestPermission().then((permission) => {
-                    // If the user accepts, let's create a notification
-                    if (permission === "granted") {
-                        alert('notification granted')
-                        self.registration.showNotification("Notification will Show like this");
-                    }
+          if (!("serviceWorker" in navigator) || !("showNotification" in ServiceWorkerRegistration.prototype)) {
+            // Service workers or showNotification are not supported
+            alert("Service workers or notifications are not supported in this browser.");
+          } else if (Notification.permission === "granted") {
+            // Check whether notification permissions have already been granted;
+            // if so, create a notification using the service worker
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.showNotification(message, {
+                icon: "/path/to/icon.png" // Optional icon for the notification
+              });
+            });
+          } else if (Notification.permission !== "denied") {
+            // We need to ask the user for permission
+            Notification.requestPermission().then((permission) => {
+              // If the user accepts, let's create a notification using the service worker
+              if (permission === "granted") {
+                navigator.serviceWorker.ready.then((registration) => {
+                  registration.showNotification(message, {
+                    body: message,
+                    icon: "/path/to/icon.png" // Optional icon for the notification
+                  });
                 });
-            }
+              }
+            });
+          }
         } catch (error) {
-
-            alert(error)
-            console.error("An error occurred while displaying the notification:", error);
+          alert("An error occurred while displaying the notification: " + error);
+          console.error("An error occurred while displaying the notification:", error);
         }
-    }
-
+      }
+      
     function blobToDataURL(blob) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
