@@ -69,7 +69,7 @@ export default function Location() {
         }, {
             timeout: 2000,
             maximumAge: 20000,
-            enableHighAccuracy: true
+            enableHighAccuracy: false
         })
     }
     async function getCacheLocation() {

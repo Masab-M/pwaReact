@@ -330,7 +330,7 @@ export default function Feed() {
         }, {
             timeout: 2000,
             maximumAge: 20000,
-            enableHighAccuracy: true
+            enableHighAccuracy: false
         })
     }
     async function getCacheLocation() {
