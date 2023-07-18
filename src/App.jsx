@@ -7,11 +7,9 @@ import Logo from "./Assets/Images/Progressive_Web_Apps_Logo.svg.png"
 
 import {BiHomeAlt2,BiCurrentLocation} from "react-icons/bi"
 import {CgFeed} from "react-icons/cg"
-
-const Location =lazy(()=> import('./View/Location'));
-const Home =lazy(()=> import('./View/Home')) ;
-const DraftFeeds = lazy(()=> import('./View/DraftFeeds'));
-const Feed = lazy(()=> import('./View/Feed'));
+import Location from "./View/Location"
+import Home from './View/Home'
+import Feed from './View/Feed'
 
 function App() {
   
@@ -43,7 +41,6 @@ function App() {
        <Routes>
         <Route path="/" element={ <Home/> } />
         <Route path="location" element={ <Location/> } />
-        <Route path="draft" element={ <DraftFeeds/> } />
         <Route path="feed" element={ <Feed/> } />
       </Routes>
       </Suspense>

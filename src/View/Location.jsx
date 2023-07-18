@@ -47,17 +47,23 @@ export default function Location() {
                         setLocation({state:state,country:country,address:FormatedAddress,city:city});
                         const cache = await caches.open("my-cache");
                         await cache.put('location-data', new Response(JSON.stringify(data)));
-
+                        await cache.put('position-data', new Response(JSON.stringify({
+                            timestamp:position.timestamp,
+                            coords:{
+                                longitude:position?.coords.longitude,
+                                latitude:position?.coords.latitude
+                            }
+                        })));
                     } else {
                         console.log('No results found.', data);
                     }
                 })
                 .catch(async (error) => {
+                    getCacheLocation()
+
                     console.log('Error occurred while geocoding:', error);
                 });
         }, error => {
-            getCacheLocation()
-            
             console.error(error)
         }, {
             timeout: 2000,
@@ -67,6 +73,8 @@ export default function Location() {
     }
     async function getCacheLocation() {
         const cacheResponse = await caches.match('location-data');
+        const PositionResponse = await caches.match('position-data');
+        setPosition(await PositionResponse.json())
         if (cacheResponse) {
             const cachedData = await cacheResponse.json();
             if (cachedData.status === 'OK') {
