@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 export default function Location() {
     const [location, setLocation] = useState()
     const [position, setPosition] = useState()
+    const [LocationErr, setLocationErr] = useState(false)
     useEffect(() => {
         findLocation()
     }, [])
@@ -27,7 +28,6 @@ export default function Location() {
                 .then((response) => response.json())
                 .then(async (data) => {
                     if (data.status === 'OK') {
-                        console.log(data);
                         const addressComponents = data.results[0].address_components;
                         const FormatedAddress = data.results[3].formatted_address;
                         let state = '';
@@ -55,16 +55,17 @@ export default function Location() {
                             }
                         })));
                     } else {
-                        console.log('No results found.', data);
+                        console.warn('No results found.', data);
                     }
                 })
                 .catch(async (error) => {
                     getCacheLocation()
 
-                    console.log('Error occurred while geocoding:', error);
+                    console.error('Error occurred while geocoding:', error);
                 });
         }, error => {
             console.error(error)
+            setLocationErr(true)
         }, {
             timeout: 2000,
             maximumAge: 20000,
@@ -72,37 +73,42 @@ export default function Location() {
         })
     }
     async function getCacheLocation() {
-        const cacheResponse = await caches.match('location-data');
-        const PositionResponse = await caches.match('position-data');
-        setPosition(await PositionResponse.json())
-        if (cacheResponse) {
-            const cachedData = await cacheResponse.json();
-            if (cachedData.status === 'OK') {
-                const addressComponents = cachedData.results[0].address_components;
-                let state = '';
-                let country = '';
-                let city="";
-                const FormatedAddress = cachedData.results[3].formatted_address
-                for (let i = 0; i < addressComponents.length; i++) {
-                    const types = addressComponents[i].types;
-                    if (types.includes('administrative_area_level_1')) {
-                        state = addressComponents[i].long_name;
-                    } else if (types.includes('country')) {
-                        country = addressComponents[i].long_name;
-                    } else if (types.includes('locality')) {
-                        city = addressComponents[i].long_name;
+        try {
+            
+            const cacheResponse = await caches.match('location-data');
+            const PositionResponse = await caches.match('position-data');
+            setPosition(await PositionResponse.json())
+            if (cacheResponse) {
+                const cachedData = await cacheResponse.json();
+                if (cachedData.status === 'OK') {
+                    const addressComponents = cachedData.results[0].address_components;
+                    let state = '';
+                    let country = '';
+                    let city="";
+                    const FormatedAddress = cachedData.results[3].formatted_address
+                    for (let i = 0; i < addressComponents.length; i++) {
+                        const types = addressComponents[i].types;
+                        if (types.includes('administrative_area_level_1')) {
+                            state = addressComponents[i].long_name;
+                        } else if (types.includes('country')) {
+                            country = addressComponents[i].long_name;
+                        } else if (types.includes('locality')) {
+                            city = addressComponents[i].long_name;
+                        }
                     }
+                    
+                    setLocation({state:state,country:country,address:FormatedAddress,city:city});
+                } else {
+                    console.warn('No results found.', cachedData);
                 }
-                
-                setLocation({state:state,country:country,address:FormatedAddress,city:city});
             } else {
-                console.log('No results found.', cachedData);
+                setLocationErr(true)
+                console.error('No cached Location available');
             }
-        } else {
-            console.log('No cached Location available');
+        } catch (error) {
+         setLocationErr(true)   
         }
     }
-    console.log(location);
     return (
         <>
             <div className="locationDetails">
@@ -150,9 +156,13 @@ export default function Location() {
                             </div>
                         </>
                         :
+                        LocationErr?
+
                         <div className="LocationErr">
                             <span>Permission Denied or Location Error</span>
                         </div>
+                        :
+                        <div className="spinner"></div>
                 }
             </div>
         </>

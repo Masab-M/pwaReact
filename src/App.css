@@ -276,9 +276,18 @@ nav .logo {
   font-family: 'Nunito Sans';
   font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
   color: red;
   text-align: center;
+}
+.CameraStatus span {
+  font-family: 'Nunito Sans';
+  background: #ff00005e;
+  font-size: 12px;
+  padding: 10px;
+  display: block;
+  margin: 10px 0px;
+  border-radius: 9px;
+  color: #000;
 }
 .feedlist .post {
   background-color: #f7f7f7;

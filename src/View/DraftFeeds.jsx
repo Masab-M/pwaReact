@@ -126,7 +126,7 @@ export default function DraftFeeds() {
                 track.applyConstraints({
                     advanced: [{ torch: true }]
                 }).catch((err) => {
-                    console.log('unsupported');
+                    console.warn('unsupported');
                 })
             });
             const btn2 = document.getElementById('switchFlashOff')
@@ -135,7 +135,7 @@ export default function DraftFeeds() {
                 track.applyConstraints({
                     advanced: [{ torch: false }]
                 }).catch((err) => {
-                    console.log('unsupported');
+                    console.warn('unsupported');
                 })
             });
             document.querySelector('video').srcObject = stream

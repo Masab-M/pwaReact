@@ -49,7 +49,7 @@ export default function Feed() {
     const messaging = getMessaging(firebase);
     const [draftPost, setDraftPost] = useState([])
     const [editPostType, setEditPostType] = useState('')
-    const [posts, setPosts] = useState([])
+    const [posts, setPosts] = useState(null)
     const newPostRef = useRef(null)
     const editPostRef = useRef(null)
     const [cameraType, setCameraType] = useState(true)
@@ -74,6 +74,8 @@ export default function Feed() {
     const [editId, setEditId] = useState(null)
     const [imageEdited, setImageEdited] = useState(false)
     const [imageError, setImageError] = useState(false)
+    const [contentLoaded, setContentLoaded] = useState(false)
+    const [cameraStatus, setCameraStatus] = useState('')
     const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
         setCroppedAreaPixels(croppedAreaPixels)
     }, [])
@@ -111,17 +113,11 @@ export default function Feed() {
     useEffect(() => {
         getToken(messaging, { vapidKey: 'BIzKOvgVoHRPFInzJ0O7rGWRGUrWncaDF2i0uDZ8PtWHW14EieVj9dn4gYJQ4CHAu68teNS1_DBWYk1ZmemjhL0' }).then((currentToken) => {
             if (currentToken) {
-                console.log(currentToken);
-                // Send the token to your server and update the UI if necessary
-                // ...
+                localStorage.setItem('token',currentToken)
             } else {
-                // Show permission request UI
-                console.log('No registration token available. Request permission to generate one.');
-                // ...
             }
         }).catch((err) => {
-            console.log('An error occurred while retrieving token. ', err);
-            // ...
+            console.error('An error occurred while retrieving token. ', err);
         });
         // syncEdit();
         getIndexDBData().then((res) => {
@@ -134,6 +130,7 @@ export default function Feed() {
         })
         getFeeds().then((data) => {
             setPosts(data)
+            setContentLoaded(true)
         }).catch(async (err) => {
             handleSyncClick("feedRefresh")
             getFeedCache()
@@ -142,7 +139,6 @@ export default function Feed() {
     useEffect(() => {
         findLocation()
         function handleResize() {
-            console.log('resize');
             setWindowDimensions(getWindowDimensions());
             if (!editPostModal && !newPostModal) return false
             if (editPostModal) {
@@ -159,7 +155,8 @@ export default function Feed() {
             const handleMessage = event => {
                 if (event.data.tag === "feedRefresh") {
                     try {
-                        setPosts([]);
+                        setPosts(null);
+                        setContentLoaded(false)
                         SyncData();
                         syncDelete();
                         syncEdit();
@@ -272,10 +269,10 @@ export default function Feed() {
                     }
                 })
                 .catch((error) => {
-                    console.log('Sync registration failed:', error);
+                    console.error('Sync registration failed:', error);
                 });
         } else {
-            console.log('Background sync is not supported');
+            console.warn('Background sync is not supported');
         }
     };
     async function getFeedCache() {
@@ -283,8 +280,9 @@ export default function Feed() {
         if (cacheResponse) {
             const cachedData = await cacheResponse.json();
             setPosts(cachedData)
+            setContentLoaded(true)
+            
         } else {
-            console.log('No cached data available');
         }
     }
     useEffect(() => {
@@ -320,11 +318,11 @@ export default function Feed() {
                         await cache.put('location-data', new Response(JSON.stringify(data)));
 
                     } else {
-                        console.log('No results found.', data);
+                        console.warn('No results found.', data);
                     }
                 })
                 .catch(async (error) => {
-                    console.log('Error occurred while geocoding:', error);
+                    console.error('Error occurred while geocoding:', error);
                 });
         }, error => {
             getCacheLocation()
@@ -355,10 +353,10 @@ export default function Feed() {
 
                 setLocation(`${state}, ${country}`);
             } else {
-                console.log('No results found.', cachedData);
+                console.error('No results found.', cachedData);
             }
         } else {
-            console.log('No cached Location available');
+            console.error('No cached Location available');
         }
     }
     async function getFeeds() {
@@ -377,37 +375,44 @@ export default function Feed() {
     }
     async function openCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: false,
-                video: {
-                    aspectRatio: 1 / 1,
-                    facingMode: cameraType ? "user" : "environment"
-                }
-            })
-            setCameraAccess(true)
-            const videoTracks = stream.getVideoTracks()
-            const track = videoTracks[0]
-            const btn = document.getElementById('switchFlash')
-            btn.addEventListener('click', function () {
-                setTorch(true)
-                track.applyConstraints({
-                    advanced: [{ torch: true }]
-                }).catch((err) => {
-                    console.log('unsupported');
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: {
+                        aspectRatio: 1 / 1,
+                        facingMode: cameraType ? "user" : "environment"
+                    }
                 })
-            });
-            const btn2 = document.getElementById('switchFlashOff')
-            btn2.addEventListener('click', function () {
-                setTorch(false)
-                track.applyConstraints({
-                    advanced: [{ torch: false }]
-                }).catch((err) => {
-                    console.log('unsupported');
-                })
-            });
-            document.querySelector('video').srcObject = stream
+                setCameraAccess(true)
+                const videoTracks = stream.getVideoTracks()
+                const track = videoTracks[0]
+                const btn = document.getElementById('switchFlash')
+                btn.addEventListener('click', function () {
+                    setTorch(true)
+                    track.applyConstraints({
+                        advanced: [{ torch: true }]
+                    }).catch((err) => {
+                    })
+                });
+                const btn2 = document.getElementById('switchFlashOff')
+                btn2.addEventListener('click', function () {
+                    setTorch(false)
+                    track.applyConstraints({
+                        advanced: [{ torch: false }]
+                    }).catch((err) => {
+                    })
+                });
+                document.querySelector('video').srcObject = stream
+                setCameraStatus('')
+            }
+            else {
+                console.error('getUserMedia is not supported in this browser.');
+                setCameraStatus('Camera is not Supported in this Browser')
+              }
+            
         } catch (error) {
             console.error(error)
+            setCameraStatus('Camera Required, Allow Camera')
         }
     }
     function closeCamera() {
@@ -514,7 +519,7 @@ export default function Feed() {
                 }
             })
             .catch(error => {
-                console.log(error);
+                console.error(error);
             })
     }
     async function handlePostForm(e) {
@@ -543,7 +548,7 @@ export default function Feed() {
                     handleSyncClick("feedRefresh")
                     setRefresh(!refresh)
                 } catch (error) {
-                    console.log(`Failed to add : ${error}`);
+                    console.error(`Failed to add : ${error}`);
                 }
             }
             else {
@@ -636,7 +641,6 @@ export default function Feed() {
             newObj.data.image = blob;
             setEditId(newObj)
             if (editPostType === "draft") {
-                console.log(editId.id);
                 const editDB = await indexDB.posts.where("id").equals(editId.id).first();
                 if (editDB) {
                     await indexDB.posts.update(editDB.id, {
@@ -696,6 +700,8 @@ export default function Feed() {
                         };
                         updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
                         setPosts(updatedItems);
+            setContentLoaded(true)
+                        
                         const cache = await caches.open("my-cache");
                         await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));
                     }
@@ -739,6 +745,8 @@ export default function Feed() {
                 }
                 let filteredArray = posts.filter(item => item.id !== deleteID)
                 setPosts(filteredArray);
+            setContentLoaded(true)
+
                 const cache = await caches.open("my-cache");
                 await cache.put('firebase-data', new Response(JSON.stringify(filteredArray)));
                 handlePostDeleteClose()
@@ -753,11 +761,13 @@ export default function Feed() {
                 setRefresh(!refresh)
             }
         }
-        console.log('Delete ID', id);
     }
     const handleNewPostClose = () => {
         setNewPostModal(false);
         setNewPost({})
+        setHeadingValue({ value: '', error: false })
+        setContentValue({ value: '', error: false })
+        setCameraStatus('')
         setImageError(false)
         setFormErr(false)
     };
@@ -784,6 +794,7 @@ export default function Feed() {
         editPostRef.current.reset()
         setHeadingValue({ value: '', error: false })
         setContentValue({ value: '', error: false })
+        setCameraStatus('')
         setAddingPost(false)
         setEditId(null)
         setImageEdited(false)
@@ -794,7 +805,6 @@ export default function Feed() {
     useEffect(() => {
         handleResizeText(textAreaRef)
         handleResizeHeading(textHeadingRef)
-        console.log(editId);
     }, [editId])
     function checkHeadingCount(e) {
         if (e.target.value.length <= 50 || e.target.value.length === 0) {
@@ -811,7 +821,6 @@ export default function Feed() {
             setContentValue({ ...contentValue, error: true })
         }
     }
-    console.log(contentValue);
     function clearImage() {
         if (editPostModal && editId) {
             let postObj = structuredClone(editId);
@@ -832,12 +841,20 @@ export default function Feed() {
                         <div className="contentSection">
                             <div className="title">
                                 <label htmlFor="heading">Heading</label>
-                                <textarea value={headingValue.value} row={1} ref={textHeadingRefNew} onChange={checkHeadingCount} rows={1} disabled={addingPost} onInput={() => { handleResizeHeading(textHeadingRefNew) }} name="heading" id="heading" placeholder='Add Post Heading' />
+                                <textarea value={headingValue.value} row={1} ref={textHeadingRefNew} onChange={(e)=>{
+                                    setFormErr(false)
+                                    
+                                    checkHeadingCount(e)
+                                    }} rows={1} disabled={addingPost} onInput={() => { handleResizeHeading(textHeadingRefNew) }} name="heading" id="heading" placeholder='Add Post Heading' />
                                 <div className="inputInfo">
                                     <span>
                                         {
                                             headingValue.error ?
                                                 "Only 50 Characters" : ""
+                                        }
+                                        {
+                                            (formErr && headingValue.value==='') &&
+                                            "Heading Missing"
                                         }
                                     </span>
                                     <span>{headingValue.value.length}/50</span>
@@ -854,6 +871,10 @@ export default function Feed() {
                                         {
                                             contentValue.error ?
                                                 "Only 3000 Characters" : ""
+                                        }
+                                        {
+                                            (formErr && contentValue.value==='') &&
+                                            "Content Missing"
                                         }
                                     </span>
                                     <span>{contentValue.value.length}/3000</span>
@@ -882,12 +903,14 @@ export default function Feed() {
                                     }} />
                                 </div>
                             </div>
-                            {
-                                formErr &&
                                 <div className="newPostErr">
-                                    <span>Add image and content first.</span>
+                                    <span>
+                                    {
+                                        (formErr && !newPost.image) &&
+                                        "Image Missing"
+                                    }
+                                    </span>
                                 </div>
-                            }
                             <button type='submit'>
                                 {
                                     addingPost ?
@@ -896,6 +919,17 @@ export default function Feed() {
                                         "Post"
                                 }
                             </button>
+                        </div>
+                        <div className="CameraStatus">
+                            {
+                                cameraStatus!==''
+                                &&
+                            <span>
+                                {
+                                    cameraStatus
+                                }
+                            </span>
+                            }
                         </div>
                     </form>
                 </div>
@@ -916,6 +950,10 @@ export default function Feed() {
                                             headingValue.error ?
                                                 "Only 50 Characters" : ""
                                         }
+                                        {
+                                            (formErr && headingValue.value==='') &&
+                                            "Heading Missing"
+                                        }
                                     </span>
                                     <span>{headingValue.value.length}/50</span>
                                 </div>
@@ -931,6 +969,10 @@ export default function Feed() {
                                         {
                                             contentValue.error ?
                                                 "Only 50 Characters" : ""
+                                        }
+                                          {
+                                            (formErr && contentValue.value==='') &&
+                                            "Content Missing"
                                         }
                                     </span>
                                     <span>{contentValue.value.length}/3000</span>
@@ -955,20 +997,34 @@ export default function Feed() {
                                     }} />
                                 </div>
                             </div>
-                            {
-                                formErr &&
                                 <div className="newPostErr">
-                                    <span>Add {!editId.data.image && "Image,"}{headingValue.value === '' && "Heading,"} {contentValue.value === '' && "Description"}</span>
+                                    <span>
+                                    {
+                                        editId &&
+                                            (formErr && !editId.data.image) &&
+                                            "Image Missing"
+                                    }
+                                    </span>
                                 </div>
-                            }
                             <button type='submit'>
                                 {
                                     addingPost ?
-                                        "Posting..."
+                                        "Updating..."
                                         :
-                                        "Post"
+                                        "Update"
                                 }
                             </button>
+                        </div>
+                        <div className="CameraStatus">
+                            {
+                                cameraStatus!==''
+                                &&
+                            <span>
+                                {
+                                    cameraStatus
+                                }
+                            </span>
+                            }
                         </div>
                     </form>
                 </div>
@@ -1105,9 +1161,7 @@ export default function Feed() {
                                 <span>Be First to add new Feed</span>
                             </div>
                         :
-                        <div className="PostErr">
-                            <span>Internet Disconnected</span>
-                        </div>
+                        <div className="spinner"></div>
                 }
             </div>
         </>
