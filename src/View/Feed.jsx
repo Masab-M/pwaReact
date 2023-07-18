@@ -598,7 +598,7 @@ export default function Feed() {
             // if so, create a notification using the service worker
             navigator.serviceWorker.ready.then((registration) => {
               registration.showNotification(message, {
-                icon: "/path/to/icon.png" // Optional icon for the notification
+                icon: "/logo192.png" // Optional icon for the notification
               });
             });
           } else if (Notification.permission !== "denied") {

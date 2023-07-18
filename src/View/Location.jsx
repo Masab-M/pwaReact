@@ -74,7 +74,6 @@ export default function Location() {
     }
     async function getCacheLocation() {
         try {
-            
             const cacheResponse = await caches.match('location-data');
             const PositionResponse = await caches.match('position-data');
             setPosition(await PositionResponse.json())
