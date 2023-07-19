@@ -76,7 +76,7 @@ function App() {
         setFormError('')
         try {
           await sendSignInLinkToEmail(auth,e.target[0].value, {
-            url: 'https://pwa-react-tau.vercel.app/feed', // Replace with your React app URL
+            url: 'https://pwa-react-tau.vercel.app/feed',
             handleCodeInApp: true,
           });
           window.localStorage.setItem('emailForSignIn', e.target[0].value);
