@@ -369,7 +369,44 @@ nav .logo {
 .AppMenus {
   padding: 15px 0px;
 }
+.LoginChoice {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  justify-content: center;
+  gap: 10px;
+}
 
+.LoginChoice .EmailAuth, .LoginChoice .PhoneAuth {
+  flex: 1;
+}
+
+.LoginChoice .EmailAuth label, .LoginChoice .PhoneAuth label {
+  border-radius: 10px;
+  padding: 20px;
+  cursor: pointer;
+  box-shadow:1px 4px 9px -3px #0000001a;
+  font-size: 16px;
+  font-family: 'Nunito Sans';
+  font-weight: 600;
+  display: block;
+}
+.loginPopup .LoginHead {
+  margin-bottom: 20px;
+}
+
+.loginPopup .LoginHead h3 {
+  font-size: 20px;
+  font-family: 'Nunito Sans';
+  font-weight: 900;
+}
+.LoginChoice .EmailAuth input:checked + label, .LoginChoice .PhoneAuth input:checked + label {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+.loginPopup {
+  padding: 15px;
+}
 .AppScreeen svg {
   font-size: 20px;
   color: #fff;
@@ -396,4 +433,40 @@ nav .logo {
 
 .LocationErr {
   text-align: center;
+}
+.ChoiceInput label {
+  display: block;
+  font-size: 15px;
+  font-family: 'Nunito Sans';
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.PhoneInput,.EmailInput {
+  text-align: left;
+}
+
+.ChoiceInput input {
+  outline: none;
+  padding: 8px 10px;
+  border: 1px solid #d4d4d4;
+  border-radius: 7px;
+  width: -webkit-fill-available;
+  margin-bottom: 10px;
+}
+
+.sendOtp,.sendLink {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sendOtp button,.sendLink Button {
+  cursor: pointer;
+  font-weight: 800;
+  background-color: var(--primary-color);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  color: #fff;
+  font-family: 'Nunito Sans';
 }

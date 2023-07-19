@@ -1,4 +1,4 @@
-.addFeed button {
+.addFeed button,.LoginButtons button {
     margin-left: auto;
     gap: 5px;
     display: flex;

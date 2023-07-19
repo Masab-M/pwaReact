@@ -125,7 +125,7 @@ export default function Location() {
                                     <span>{position?.coords.longitude}</span>
                                 </div>
                                 <div className="location_Details">
-                                    <span>Longitude: </span>
+                                    <span>Latittude: </span>
                                     <span>{position?.coords.latitude}</span>
                                 </div>
                             </div>
