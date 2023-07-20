@@ -361,10 +361,23 @@ nav .logo {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+.spinnerButton {
+  width: 10px;
+  display: flex;
+  height: 10px;
+  border: 2px solid #ffffff00;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spinButton 1s linear infinite;
+}
 
 @keyframes spin {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes spinButton {
+  0% { transform:  rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 .AppMenus {
   padding: 15px 0px;
@@ -455,12 +468,12 @@ nav .logo {
   margin-bottom: 10px;
 }
 
-.sendOtp,.sendLink,.emailForm .confirmButton {
+.sendOtp,.sendLink,.emailForm .confirmButton ,.verifyOtpButton{
   display: flex;
   justify-content: flex-end;
 }
 
-.sendOtp button,.sendLink Button ,.emailForm .confirmButton button:last-child{
+.sendOtp button,.sendLink Button ,.emailForm .confirmButton button:last-child,.verifyOtpButton button{
   cursor: pointer;
   font-weight: 800;
   background-color: var(--primary-color);
@@ -468,7 +481,10 @@ nav .logo {
   padding: 8px 20px;
   border-radius: 20px;
   color: #fff;
+  display: flex;
   font-family: 'Nunito Sans';
+  align-items: center;
+  gap: 5px;
 }
 .emailForm .confirmButton button:first-child{
   cursor: pointer;
@@ -485,4 +501,14 @@ nav .logo {
   font-family: 'Nunito Sans';
   font-weight: 700;
   color: #ff3b3b;
+}
+.Logout button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.Logout button svg {
+  font-size: 18px;
+  color: var(--primary-color);
 }

@@ -11,9 +11,11 @@ import Location from "./View/Location"
 import Home from './View/Home'
 import Feed from './View/Feed'
 import Modal from './Partials/Modal';
+import {FiLogOut} from "react-icons/fi"
 import firebase from './Utils/Firebase';
-import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier, signOut } from "firebase/auth";
 function App() {
+  const [loading, setLoading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loginSuccess, setLoginSuccess] = useState(null)
   useEffect(() => {
@@ -64,7 +66,10 @@ function App() {
         setIsLoggedIn(true)
         // ...
       } else {
+        localStorage.removeItem('uid');
+        localStorage.removeItem('email');
         setIsLoggedIn(false)
+        console.log('logout');
       }
     });
   }, [])
@@ -100,43 +105,55 @@ function App() {
     setLoginChoice(event.target.value);
   };
   async function handleEmailLink(e) {
+    setLoading(true)
+
     e.preventDefault();
     if (e.target[0].value) {
       if (isValidEmail(e.target[0].value)) {
         setFormError('')
         try {
-          await sendSignInLinkToEmail(auth, e.target[0].value, {
-            url: 'https://pwa-react-tau.vercel.app/feed',
+          await sendSignInLinkToEmail(auth,e.target[0].value, {
+            url: 'http://localhost:3000/feed',
             handleCodeInApp: true,
           });
           window.localStorage.setItem('emailForSignIn', e.target[0].value);
           setEntrySuccess({ ...entrySuccess, link: true })
+        setLoading(false)
+          
         } catch (error) {
+        setLoading(false)
+        setFormError("Try Login with Phone, Email Link is Exceeded")
           console.error(error);
         }
 
       }
       else {
         setFormError('Email Invalid')
+        setLoading(false)
       }
     }
     else {
+      setLoading(false)
       setFormError('Fill Email First')
     }
   }
   async function handlePhoneOtp(e) {
+    setLoading(true)
     e.preventDefault();
     if (e.target[0].value) {
       if (validatePhoneNumber(e.target[0].value)) {
         setFormError('')
         onSignUpPhone(e.target[0].value)
+
       }
       else {
+        setLoading(false)
         setFormError('Phone Number Invalid')
       }
     }
     else {
       setFormError("Fill Number First")
+      setLoading(false)
     }
   }
   async function onCaptchaVerify(email) {
@@ -168,8 +185,11 @@ function App() {
         console.log(confirmationResult);
         window.confirmationResult = confirmationResult;
         setEntrySuccess({ ...entrySuccess, otp: true })
+        setLoading(false)
         // ...
       }).catch((error) => {
+        setLoading(false)
+
         console.error(error);
         // Error; SMS not sent
         // ...
@@ -184,6 +204,8 @@ function App() {
     return regex.test(phoneNumber);
   }
   function handleConfirmEmail(e) {
+    setLoading(true)
+
     e.preventDefault();
     if (e.target[0].value) {
       if (isValidEmail(e.target[0].value)) {
@@ -194,14 +216,19 @@ function App() {
           setIsLoggedIn(true)
           handleEmailConfirmClose()
           setLoginSuccess(true)
+        setLoading(false)
         }).catch((err) => {
           handleEmailConfirmClose()
           setIsLoggedIn(false)
+        setLoading(false)
+
           setLoginSuccess(false)
           console.error('Error from catch', err);
         })
       }
       else {
+        setLoading(false)
+
         setFormError('Email Invalid')
       }
     }
@@ -210,6 +237,7 @@ function App() {
     }
   }
   function onOTPVerify(e){
+    setLoading(true)
     e.preventDefault()
     if(e.target[0].value!=='')
     {
@@ -219,16 +247,29 @@ function App() {
         setIsLoggedIn(true)
         setLoginSuccess(true)
         handleLoginClose()
+        setLoading(false)
+
       }).catch((err)=>{
         console.error(err);
         setFormError('OTP Invalid')
         setIsLoggedIn(false)
         setLoginSuccess(false)
+        setLoading(false)
       })
     }
     else{
+      setLoading(false)
       setFormError('Enter OTP First')
     }
+  } 
+  function logoutUser(){
+    signOut(auth).then(() => {
+      localStorage.removeItem('uid')
+      localStorage.removeItem('email')
+      setIsLoggedIn(false)
+    }).catch((error) => {
+      console.error(error);
+    });
   }
   return (
     <>
@@ -241,10 +282,13 @@ function App() {
             <form action="" onSubmit={handleConfirmEmail}>
               <div className="emailInput">
                 <label htmlFor="emailConfirm">Login Email</label>
-                <input type="text" name="emailConfirm" id="emailConfirm" placeholder='Please enter Your Email' />
+                <input  onChange={()=>{
+                  setFormError('')
+                }} type="text" name="emailConfirm" id="emailConfirm" placeholder='Please enter Your Email' />
                 <div className="confirmButton">
                   <button onClick={handleEmailConfirmClose} type='button'>Cancel</button>
-                  <button type='submit'>Confirm Email</button>
+                  <button type='submit' >
+                    Confirm Email</button>
                 </div>
               </div>
             </form>
@@ -278,7 +322,9 @@ function App() {
                   <form action="" onSubmit={handleEmailLink}>
                     <div className="EmailInput">
                       <label htmlFor="">Email</label>
-                      <input type="text" name="emailAuthentication" id="emailAuthentication" />
+                      <input  onChange={()=>{
+                  setFormError('')
+                }} type="text" name="emailAuthentication" id="emailAuthentication" />
                       <div className="FormErr">
                         {
                           formError !== '' &&
@@ -286,7 +332,13 @@ function App() {
                         }
                       </div>
                       <div className="sendLink">
-                        <button>Send Login Link</button>
+                        <button disabled={loading}>
+                          {
+                            loading&&
+                            <div className="spinnerButton"></div>
+                          }
+                          
+                          Send Login Link</button>
                       </div>
                     </div>
                   </form>
@@ -318,7 +370,9 @@ function App() {
                   <form action="" onSubmit={handlePhoneOtp}>
                     <div className="PhoneInput">
                       <label htmlFor="phoneNumber">Phone Number</label>
-                      <input type="text" name="phoneNumber" id="phoneNumber" />
+                      <input onChange={()=>{
+                  setFormError('')
+                }} type="text" name="phoneNumber" id="phoneNumber" />
                       <div className="FormErr">
                         {
                           formError !== '' &&
@@ -326,7 +380,13 @@ function App() {
                         }
                       </div>
                       <div className="sendOtp">
-                        <button>Send Otp</button>
+                        <button>
+                        {
+                            loading&&
+                            <div className="spinnerButton"></div>
+                          }
+                          
+                          Send Otp</button>
                       </div>
                     </div>
                   </form>
@@ -340,9 +400,22 @@ function App() {
                         <form onSubmit={onOTPVerify}>
                           <div className="phoneSuccess">
                             <div className="VerifyOtp">
-                              <input type="text" name="otp" id="otp" placeholder='OTP' />
+                              <input onChange={()=>{
+                  setFormError('')
+                }} type="text" name="otp" id="otp" placeholder='OTP' />
+                              <div className="FormErr">
+                        {
+                          formError !== '' &&
+                          <span>{formError}</span>
+                        }
+                      </div>
                               <div className="verifyOtpButton">
-                                <button>Verify Otp</button>
+                                <button>
+                                {
+                            loading&&
+                            <div className="spinnerButton"></div>
+                          }
+                                  Verify Otp</button>
                               </div>
                             </div>
                           </div>
@@ -362,9 +435,7 @@ function App() {
             }
           </div>
         </div>
-        <div id="recaptcha-container">
-
-</div>
+        
       </Modal>
       <div className="App">
         <nav>
@@ -383,6 +454,11 @@ function App() {
                 <NavLink to="/location">Locate</NavLink>
               </li>
             </ul>
+          </div>
+          <div className="Logout">
+            <button onClick={logoutUser}>
+              <FiLogOut/>
+            </button>
           </div>
         </nav>
         <Suspense fallback={
