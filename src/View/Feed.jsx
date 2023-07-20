@@ -14,7 +14,17 @@ import Cropper from 'react-easy-crop'
 import getCroppedImg from '../Partials/Crop/GetCropImage'
 import { indexDB } from "../Utils/indexdb";
 import SingleDraftFeed from './SingleDraftFeed'
-export default function Feed() {
+export default function Feed({isLogin,LoginPopup,loginSuccess}) {
+    useEffect(() => {
+        if(loginSuccess===true){
+            notifyMe('Login Successfull')
+        }
+        else if(loginSuccess===false)
+        {
+            notifyMe('Login Failed Try Again')
+        }
+    }, [loginSuccess])
+    
     const textAreaRef = useRef(null)
     const [headingValue, setHeadingValue] = useState({
         value: "",
@@ -475,7 +485,8 @@ export default function Feed() {
             content: obj.content,
             heading: obj.heading,
             location: location === "" ? obj.location : location,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            uid:obj.uid,
         });
         if (obj.indexid) {
             deleteIndexRow(obj.indexid).then((res) => {
@@ -530,6 +541,7 @@ export default function Feed() {
             newObj.heading = e.target[0].value;
             newObj.content = e.target[1].value;
             newObj.image = blob
+            newObj.uid=localStorage.getItem('uid')
             setNewPost(newObj)
             if (!navigator.onLine) {
                 try {
@@ -538,6 +550,7 @@ export default function Feed() {
                         content: e.target[1].value,
                         image: blob,
                         location: location,
+                        uid:localStorage.getItem('uid')
                     })
                     e.target.reset();
                     setHeadingValue({ value: '', error: false })
@@ -1133,7 +1146,15 @@ export default function Feed() {
             </div>
             <div className="NewFeed">
                 <div className="addFeed">
-                    <button onClick={handleNewPostShow}>
+                    <button onClick={()=>{
+                        if(isLogin)
+                        {
+                            handleNewPostShow()
+                        }
+                        else{
+                            LoginPopup()
+                        }
+                    }}>
                         Add Feed
                         <BiImageAdd />
                     </button>
@@ -1153,7 +1174,7 @@ export default function Feed() {
                     posts ?
                         posts.length > 0 ?
                             posts.map((p, i) =>
-                                <SingleFeed key={i} data={p.data} setEditPostType={setEditPostType} id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} />
+                                <SingleFeed key={i} data={p.data} setEditPostType={setEditPostType} id={p.id} showModal={handlePostDeleteShow} setdeleteID={setDeleteID} setupdateId={setEditId} showEditModal={handleEditShow} setHeading={setHeadingValue} setContent={setContentValue} isLogin={isLogin} />
                             )
                             :
                             draftPost.length === 0 &&

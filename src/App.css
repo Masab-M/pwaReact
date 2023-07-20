@@ -391,11 +391,11 @@ nav .logo {
   font-weight: 600;
   display: block;
 }
-.loginPopup .LoginHead {
+.loginPopup .LoginHead,.confirmHeading {
   margin-bottom: 20px;
 }
 
-.loginPopup .LoginHead h3 {
+.loginPopup .LoginHead h3,.confirmHeading h3 {
   font-size: 20px;
   font-family: 'Nunito Sans';
   font-weight: 900;
@@ -404,7 +404,7 @@ nav .logo {
   background-color: var(--primary-color);
   color: #fff;
 }
-.loginPopup {
+.loginPopup,.ConfirmEmail {
   padding: 15px;
 }
 .AppScreeen svg {
@@ -434,7 +434,7 @@ nav .logo {
 .LocationErr {
   text-align: center;
 }
-.ChoiceInput label {
+.ChoiceInput label,.emailForm .emailInput label {
   display: block;
   font-size: 15px;
   font-family: 'Nunito Sans';
@@ -442,11 +442,11 @@ nav .logo {
   margin-bottom: 5px;
 }
 
-.PhoneInput,.EmailInput {
+.PhoneInput,.EmailInput ,.emailForm .emailInput{
   text-align: left;
 }
 
-.ChoiceInput input {
+.ChoiceInput input ,.emailForm .emailInput input{
   outline: none;
   padding: 8px 10px;
   border: 1px solid #d4d4d4;
@@ -455,12 +455,12 @@ nav .logo {
   margin-bottom: 10px;
 }
 
-.sendOtp,.sendLink {
+.sendOtp,.sendLink,.emailForm .confirmButton {
   display: flex;
   justify-content: flex-end;
 }
 
-.sendOtp button,.sendLink Button {
+.sendOtp button,.sendLink Button ,.emailForm .confirmButton button:last-child{
   cursor: pointer;
   font-weight: 800;
   background-color: var(--primary-color);
@@ -469,4 +469,20 @@ nav .logo {
   border-radius: 20px;
   color: #fff;
   font-family: 'Nunito Sans';
+}
+.emailForm .confirmButton button:first-child{
+  cursor: pointer;
+  font-weight: 800;
+  background-color:#fff ;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  color:red;
+  font-family: 'Nunito Sans';
+}
+.FormErr span {
+  font-size: 12px;
+  font-family: 'Nunito Sans';
+  font-weight: 700;
+  color: #ff3b3b;
 }

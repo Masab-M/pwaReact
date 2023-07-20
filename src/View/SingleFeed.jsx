@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 import  {AiOutlineEdit,AiOutlineDelete} from "react-icons/ai"
 import {BsThreeDots} from "react-icons/bs"
-export default function SingleFeed({setEditPostType,data,id,showModal,setdeleteID,setupdateId,showEditModal,setHeading,setContent}) {
+export default function SingleFeed({setEditPostType,data,id,showModal,setdeleteID,setupdateId,showEditModal,setHeading,setContent,isLogin}) {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [moreInfo, setMoreInfo] = useState(false)
     const [seeMore, setSeeMore] = useState(false)
@@ -63,6 +63,8 @@ export default function SingleFeed({setEditPostType,data,id,showModal,setdeleteI
                     <p>{data.content}</p>
                 }
             </div>
+            {
+                (isLogin && data.uid===localStorage.getItem('uid')) &&
             <div className="udActions" ref={dropDownRef}>
                 <div className="moreInfo" onClick={()=>{
                     setMoreInfo(!moreInfo)
@@ -96,6 +98,7 @@ export default function SingleFeed({setEditPostType,data,id,showModal,setdeleteI
                 </div>
                 }
             </div>
+            }
         </div>
         <div className="postImage">
         {!imageLoaded && <div className='LazyPlaceHolder'></div>}
