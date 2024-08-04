@@ -507,7 +507,44 @@ nav .logo {
   border: none;
   cursor: pointer;
 }
+.Logout button {
+  gap: 10px;
+  display: flex;
+  align-items: center;
+}
+.phone-group {
+  margin-bottom: 10px;
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
 
+
+
+.phone-group input {
+  margin-bottom: 0px;
+  flex-basis: 80%;
+}
+.phone-group input:first-child {
+  flex-basis: 20%;
+  width: 20%;
+  outline: none;
+  padding: 8px 10px;
+  border: 1px solid #d4d4d4;
+  border-radius: 7px;
+}
+.Logout button span {
+  font-family: 'Nunito Sans';
+}
+
+.Logout {
+  position: absolute;
+  right: 10px;
+}
+.EmailSuccess span {
+  font-size: 14px;
+  font-family: 'Nunito Sans';
+}
 .Logout button svg {
   font-size: 18px;
   color: var(--primary-color);

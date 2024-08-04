@@ -14,16 +14,26 @@ import Cropper from 'react-easy-crop'
 import getCroppedImg from '../Partials/Crop/GetCropImage'
 import { indexDB } from "../Utils/indexdb";
 import SingleDraftFeed from './SingleDraftFeed'
+import { useNavigate } from 'react-router-dom'
+
 export default function Feed({isLogin,LoginPopup,loginSuccess}) {
+    const navigate =useNavigate()
     useEffect(() => {
         if(loginSuccess===true){
             notifyMe('Login Successfull')
+            navigate("/feed")
         }
         else if(loginSuccess===false)
         {
             notifyMe('Login Failed Try Again')
         }
     }, [loginSuccess])
+    useEffect(() => {
+        if(isLogin===false)
+        {
+            notifyMe('User Log out')
+        }
+    }, [isLogin])
     
     const textAreaRef = useRef(null)
     const [headingValue, setHeadingValue] = useState({
@@ -622,7 +632,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
                 navigator.serviceWorker.ready.then((registration) => {
                   registration.showNotification(message, {
                     body: message,
-                    icon: "/path/to/icon.png" // Optional icon for the notification
+                    icon: "/logo192.png" // Optional icon for the notification
                   });
                 });
               }
@@ -1188,3 +1198,33 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
         </>
     )
 }
+
+fetchDataFromNetwork()
+
+async function fetchDataFromNetwork(url) {
+    try {
+      // Fetch data from the network
+      const response = await fetch(url);
+      const apiData = await response.json();
+
+      // Store the data in the cache
+      const cache = await caches.open("my-cache");
+      await cache.put('your-data', new Response(JSON.stringify(apiData)));
+  
+      // Return the fetched data
+      return apiData;
+    } catch (error) {
+      // If there's an error fetching from the network, attempt to retrieve from cache
+      const cache = await caches.open("my-cache");
+      const cachedData = await cache.match('your-data');
+  
+      if (cachedData) {
+        // If data is found in cache, return the cached data
+        return cachedData.json();
+      } else {
+        // If data is not found in cache and there's an error fetching from network, handle the error
+        throw error;
+      }
+    }
+  }
+  

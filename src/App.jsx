@@ -16,9 +16,23 @@ import firebase from './Utils/Firebase';
 import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier, signOut } from "firebase/auth";
 function App() {
   const [loading, setLoading] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(null)
   const [loginSuccess, setLoginSuccess] = useState(null)
+  const [countryCode, setCountryCode] = useState([])
+  const [phoneCode, setPhoneCode] = useState('')
+  function getCountryCodes() {
+    
+    fetch('https://restcountries.com/v3.1/all').then((response)=> response.json()).then(async (data)=>{
+    console.log(data);
+    setCountryCode(data)
+    const cache = await caches.open("my-cache");
+    await cache.put('CountryCode-data', new Response(JSON.stringify(data)));
+    }).catch((err)=>{
+      console.error(err);
+    })
+  }
   useEffect(() => {
+    getCountryCodes()
     if (isSignInWithEmailLink(auth, window.location.href)) {
       // Additional state parameters can also be passed via URL.
       // This can be used to continue the user's intended action before triggering
@@ -80,6 +94,7 @@ function App() {
   const auth = getAuth();
   const [LoginPopup, setLoginPopup] = useState(false)
   const [loginChoice, setLoginChoice] = useState(null)
+  const [logoutPopup, setLogoutPopup] = useState(false)
   const [emailConfirmPopup, setEmailConfirmPopup] = useState(false)
   const [entrySuccess, setEntrySuccess] = useState({
     link: null,
@@ -100,26 +115,34 @@ function App() {
   const handleEmailConfirmShow = () => {
     setEmailConfirmPopup(true);
   };
+  const handleLogOutConfirmClose = () => {
+    setLogoutPopup(false);
+  };
+  const handleLogOutConfirmShow = () => {
+    setLogoutPopup(true);
+  };
   const handleLoginChoiceChange = (event) => {
     setFormError('')
     setLoginChoice(event.target.value);
   };
+  
   async function handleEmailLink(e) {
     setLoading(true)
-
     e.preventDefault();
     if (e.target[0].value) {
       if (isValidEmail(e.target[0].value)) {
         setFormError('')
         try {
           await sendSignInLinkToEmail(auth,e.target[0].value, {
-            url: 'https://pwa-react-tau.vercel.app/feed',
+            url: 'http://localhost:3000/feed',
             handleCodeInApp: true,
           });
           window.localStorage.setItem('emailForSignIn', e.target[0].value);
           setEntrySuccess({ ...entrySuccess, link: true })
         setLoading(false)
-          
+        setTimeout(() => {
+          handleLoginClose()
+        }, 3000); 
         } catch (error) {
         setLoading(false)
         setFormError("Try Login with Phone, Email Link is Exceeded")
@@ -140,11 +163,11 @@ function App() {
   async function handlePhoneOtp(e) {
     setLoading(true)
     e.preventDefault();
-    if (e.target[0].value) {
-      if (validatePhoneNumber(e.target[0].value)) {
+    if (e.target[1].value!=="" && e.target[0].value!=="") {
+      if (validatePhoneNumber(e.target[1].value)) {
         setFormError('')
-        onSignUpPhone(e.target[0].value)
-
+        console.log(phoneCode+e.target[1].value);
+        onSignUpPhone(phoneCode+e.target[1].value)
       }
       else {
         setLoading(false)
@@ -152,7 +175,14 @@ function App() {
       }
     }
     else {
-      setFormError("Fill Number First")
+      if(e.target[1].value==="")
+      {
+        setFormError("Fill Number First")
+      }
+      if(e.target[0].value==="")
+      {
+        setFormError("Fill Country Code First")
+      }
       setLoading(false)
     }
   }
@@ -185,14 +215,13 @@ function App() {
         console.log(confirmationResult);
         window.confirmationResult = confirmationResult;
         setEntrySuccess({ ...entrySuccess, otp: true })
+        setFormError('')
         setLoading(false)
-        // ...
       }).catch((error) => {
-        setLoading(false)
-
-        console.error(error);
         // Error; SMS not sent
-        // ...
+        setLoading(false)
+        setFormError('Phone Number Invalid')
+        console.error(error);
       });
   }
   function isValidEmail(email) {
@@ -200,12 +229,12 @@ function App() {
     return emailRegex.test(email);
   }
   function validatePhoneNumber(phoneNumber) {
-    const regex = /^(?:\+\d{0,12}|\d{0,11})$/;
+    console.log(phoneNumber);
+    const regex = /^\d{10,12}$/;
     return regex.test(phoneNumber);
   }
   function handleConfirmEmail(e) {
     setLoading(true)
-
     e.preventDefault();
     if (e.target[0].value) {
       if (isValidEmail(e.target[0].value)) {
@@ -220,8 +249,7 @@ function App() {
         }).catch((err) => {
           handleEmailConfirmClose()
           setIsLoggedIn(false)
-        setLoading(false)
-
+          setLoading(false)
           setLoginSuccess(false)
           console.error('Error from catch', err);
         })
@@ -248,7 +276,6 @@ function App() {
         setLoginSuccess(true)
         handleLoginClose()
         setLoading(false)
-
       }).catch((err)=>{
         console.error(err);
         setFormError('OTP Invalid')
@@ -267,13 +294,35 @@ function App() {
       localStorage.removeItem('uid')
       localStorage.removeItem('email')
       setIsLoggedIn(false)
+      handleLogOutConfirmClose()
     }).catch((error) => {
       console.error(error);
     });
   }
+  function clearConfirm(){
+    setIsLoggedIn(false)
+    setLoading(false)
+    setLoginSuccess(false)
+  }
+  function getCountryCode(e){
+    setPhoneCode(e.target.value);
+  }
   return (
     <>
-      <Modal show={emailConfirmPopup} handleClose={handleEmailConfirmClose}>
+    <Modal show={logoutPopup}  handleClose={handleLogOutConfirmClose}>
+    <div className="deleteModal">
+                    <div className="Instructions">
+                        <p>Are you sure want to Log out?</p>
+                    </div>
+                    <div className="confirmbuttons">
+                        <button onClick={handleLogOutConfirmClose}>Cancel</button>
+                        <button onClick={() => {
+logoutUser()
+                        }}>Log Out</button>
+                    </div>
+                </div>
+    </Modal>
+      <Modal show={emailConfirmPopup} clearConfirm={clearConfirm} handleClose={handleEmailConfirmClose}>
         <div className="ConfirmEmail">
           <div className="confirmHeading">
             <h3>Confirm Email</h3>
@@ -288,6 +337,10 @@ function App() {
                 <div className="confirmButton">
                   <button onClick={handleEmailConfirmClose} type='button'>Cancel</button>
                   <button type='submit' >
+                  {
+                            loading&&
+                            <div className="spinnerButton"></div>
+                          }
                     Confirm Email</button>
                 </div>
               </div>
@@ -350,7 +403,7 @@ function App() {
                       {
                         entrySuccess.link === true &&
                         <div className="EmailSuccess">
-                          <span>Email has been Sent to this "", Check your inbox or Spam also</span>
+                          <span>Email has been Sent, Check your inbox or Spam also</span>
                         </div>
                       }
                       {entrySuccess.link === false &&
@@ -370,9 +423,21 @@ function App() {
                   <form action="" onSubmit={handlePhoneOtp}>
                     <div className="PhoneInput">
                       <label htmlFor="phoneNumber">Phone Number</label>
+                      <div className="phone-group">
+                      <input list="weekday" onChange={getCountryCode}/>
+                      <datalist name="" id="weekday" >  
+                        <option value="">Select Country Code</option>
+                        {
+                          countryCode.map((c,i)=>
+                          <option value={`${c.idd.root}${c.idd.suffixes?c.idd.suffixes[0]:c.idd.suffixes}`}  key={i}>{c.flag} {c.name.common} {c.idd.root}{c.idd.suffixes?c.idd.suffixes[0]:c.idd.suffixes}</option>  
+                          )
+                        }
+                      </datalist>
                       <input onChange={()=>{
                   setFormError('')
                 }} type="text" name="phoneNumber" id="phoneNumber" />
+                      
+                      </div>
                       <div className="FormErr">
                         {
                           formError !== '' &&
@@ -455,11 +520,15 @@ function App() {
               </li>
             </ul>
           </div>
+          {
+            isLoggedIn &&
           <div className="Logout">
-            <button onClick={logoutUser}>
+            <button onClick={handleLogOutConfirmShow}>
+              <span>Logout</span>
               <FiLogOut/>
             </button>
           </div>
+          }
         </nav>
         <Suspense fallback={
           <>

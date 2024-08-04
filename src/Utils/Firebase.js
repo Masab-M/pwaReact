@@ -1,12 +1,13 @@
 import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBahqtm7u4Yrk9oHAE5vxOyi69zyqkuzQA",
-  authDomain: "social-feed-6e918.firebaseapp.com",
-  projectId: "social-feed-6e918",
-  storageBucket: "social-feed-6e918.appspot.com",
-  messagingSenderId: "707306439192",
-  appId: "1:707306439192:web:560bc764251663469a796d",
+  apiKey: "AIzaSyANDYL0YX8yfKC-axKtpxjUFUVlKB_vw1M",
+  authDomain: "pwa-react-fd69f.firebaseapp.com",
+  projectId: "pwa-react-fd69f",
+  storageBucket: "pwa-react-fd69f.appspot.com",
+  messagingSenderId: "962806344446",
+  appId: "1:962806344446:web:7a4fffcfd3bc35556dd3af",
+  measurementId: "G-1PTL4B324E"
 };
 const firebase = initializeApp(firebaseConfig);
 //const db = firebaseapp.firestore();

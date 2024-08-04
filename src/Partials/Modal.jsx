@@ -1,7 +1,7 @@
 import React from "react";
 import './Modal.css'
 import { RxCross2 } from "react-icons/rx"
-export default function Modal({ handleClose, show, children, clearImage }) {
+export default function Modal({ handleClose, show, children, clearImage ,clearConfirm}) {
     const showHideClassName = show
         ? "modal display-block"
         : "modal display-none";
@@ -14,6 +14,10 @@ export default function Modal({ handleClose, show, children, clearImage }) {
                     handleClose()
                     if (clearImage) {
                         clearImage()
+                    }
+                    if(clearConfirm)
+                    {
+                        clearConfirm()
                     }
                 }}></div>
                 <section className="modal-main">
