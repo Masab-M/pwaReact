@@ -12,7 +12,6 @@ import Home from './View/Home'
 import Feed from './View/Feed'
 import Modal from './Partials/Modal';
 import {FiLogOut} from "react-icons/fi"
-import firebase from './Utils/Firebase';
 import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signInWithPhoneNumber, RecaptchaVerifier, signOut } from "firebase/auth";
 function App() {
   const [loading, setLoading] = useState(false)
@@ -23,7 +22,6 @@ function App() {
   function getCountryCodes() {
     
     fetch('https://restcountries.com/v3.1/all').then((response)=> response.json()).then(async (data)=>{
-    console.log(data);
     setCountryCode(data)
     const cache = await caches.open("my-cache");
     await cache.put('CountryCode-data', new Response(JSON.stringify(data)));
@@ -51,7 +49,6 @@ function App() {
           .then((result) => {
             // Clear email from storage.
             window.localStorage.removeItem('emailForSignIn');
-            console.log(result);
             localStorage.setItem('uid', result.user.uid);
             localStorage.setItem('email', result.user.email);
             setIsLoggedIn(true)
@@ -83,7 +80,6 @@ function App() {
         localStorage.removeItem('uid');
         localStorage.removeItem('email');
         setIsLoggedIn(false)
-        console.log('logout');
       }
     });
   }, [])
@@ -166,7 +162,6 @@ function App() {
     if (e.target[1].value!=="" && e.target[0].value!=="") {
       if (validatePhoneNumber(e.target[1].value)) {
         setFormError('')
-        console.log(phoneCode+e.target[1].value);
         onSignUpPhone(phoneCode+e.target[1].value)
       }
       else {
@@ -194,7 +189,6 @@ function App() {
           // reCAPTCHA solved, allow signInWithPhoneNumber.
           // ...
           onSignUpPhone(email)
-          console.log(response);
         },
         'expired-callback': () => {
           // Response expired. Ask user to solve reCAPTCHA again.
@@ -212,7 +206,6 @@ function App() {
       .then((confirmationResult) => {
         // SMS sent. Prompt user to type the code from the message, then sign the
         // user in with confirmationResult.confirm(code).
-        console.log(confirmationResult);
         window.confirmationResult = confirmationResult;
         setEntrySuccess({ ...entrySuccess, otp: true })
         setFormError('')
@@ -229,7 +222,6 @@ function App() {
     return emailRegex.test(email);
   }
   function validatePhoneNumber(phoneNumber) {
-    console.log(phoneNumber);
     const regex = /^\d{10,12}$/;
     return regex.test(phoneNumber);
   }

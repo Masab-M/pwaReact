@@ -5,7 +5,6 @@ import { IoMdFlash, IoMdFlashOff } from "react-icons/io"
 import { GrClose } from "react-icons/gr"
 import firebase from '../Utils/Firebase'
 import { getFirestore, collection, getDocs, addDoc, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore/lite';
-import { getMessaging, getToken } from "firebase/messaging";
 import { BiImageAdd } from "react-icons/bi"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import "../Assets/CSS/Feed.css"
@@ -66,7 +65,6 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
         calculateHeadingAreaHeight(ref);
     };
     const db = getFirestore(firebase);
-    const messaging = getMessaging(firebase);
     const [draftPost, setDraftPost] = useState([])
     const [editPostType, setEditPostType] = useState('')
     const [posts, setPosts] = useState(null)
@@ -131,14 +129,6 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
     }
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
     useEffect(() => {
-        getToken(messaging, { vapidKey: 'BIzKOvgVoHRPFInzJ0O7rGWRGUrWncaDF2i0uDZ8PtWHW14EieVj9dn4gYJQ4CHAu68teNS1_DBWYk1ZmemjhL0' }).then((currentToken) => {
-            if (currentToken) {
-                localStorage.setItem('token',currentToken)
-            } else {
-            }
-        }).catch((err) => {
-            console.error('An error occurred while retrieving token. ', err);
-        });
         // syncEdit();
         getIndexDBData().then((res) => {
             if (res.length > 0) {
@@ -157,7 +147,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
         })
     }, [refresh])
     useEffect(() => {
-        findLocation()
+        // findLocation()
         function handleResize() {
             setWindowDimensions(getWindowDimensions());
             if (!editPostModal && !newPostModal) return false
@@ -180,7 +170,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
                         SyncData();
                         syncDelete();
                         syncEdit();
-                        findLocation();
+                        // findLocation();
                         notifyMe("Back Online");
                         setRefresh(!refresh);
                     } catch (error) {
@@ -315,6 +305,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
     }, [cameraType])
     function findLocation() {
         navigator.geolocation.getCurrentPosition(position => {
+            console.log(position);
             fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=AIzaSyACIbySi3LQJrBV9l55JAgM5k6Qy_2SW94`
             )
@@ -338,7 +329,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
                         await cache.put('location-data', new Response(JSON.stringify(data)));
 
                     } else {
-                        console.warn('No results found.', data);
+                        console.warn('No results', data);
                     }
                 })
                 .catch(async (error) => {
@@ -391,6 +382,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
         })
         const cache = await caches.open("my-cache");
         await cache.put('firebase-data', new Response(JSON.stringify(feedList)));
+        console.log(feedList);
         return feedList;
     }
     async function openCamera() {
@@ -490,13 +482,21 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
         });
     }
     async function addPost(obj) {
-        await addDoc(collection(db, "feed"), {
-            image: obj.image,
-            content: obj.content,
-            heading: obj.heading,
+        console.log({
+            image: obj.image || null,
+            content: obj.content || null,
+            heading: obj.heading || null,
             location: location === "" ? obj.location : location,
-            timestamp: Date.now(),
-            uid:obj.uid,
+            timestamp: Date.now() || null,
+            uid:obj.uid || null,
+        });
+        await addDoc(collection(db, "feed"), {
+            image: obj.image || null,
+            content: obj.content || null,
+            heading: obj.heading || null,
+            location: 'Remote',
+            timestamp: Date.now() || null,
+            uid:obj.uid || null,
         });
         if (obj.indexid) {
             deleteIndexRow(obj.indexid).then((res) => {
@@ -723,7 +723,7 @@ export default function Feed({isLogin,LoginPopup,loginSuccess}) {
                         };
                         updatedItems[index] = updatedItem; // Replace the item at the found index with the updated object
                         setPosts(updatedItems);
-            setContentLoaded(true)
+                        setContentLoaded(true)
                         
                         const cache = await caches.open("my-cache");
                         await cache.put('firebase-data', new Response(JSON.stringify(updatedItems)));

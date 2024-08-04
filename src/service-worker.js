@@ -87,8 +87,6 @@ function sendFeedMessage(tag) {
   });
 }
 // self.addEventListener('push', function(event) {
-//   console.log('[Service Worker] Push Received.');
-//   console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
 
 //   const title = 'Push Codelab';
 //   const options = {
@@ -101,7 +99,6 @@ function sendFeedMessage(tag) {
 // });
 // function sendPostMessage(tag) {
 //   self.clients.matchAll().then((clients) => {
-//     console.log(clients);
 //     clients.forEach((client) => {
 //       client.postMessage({ tag: tag, message: "Sync event completed" });
 //     });
